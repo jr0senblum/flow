@@ -1,0 +1,2 @@
+-module(joint, [Id, Name::string()]).
+-compile(export_all).

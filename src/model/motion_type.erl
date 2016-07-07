@@ -1,0 +1,2 @@
+-module(motion_type, [Id, Name::string()]).
+-compile(export_all).

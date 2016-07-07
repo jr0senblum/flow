@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>{% block title %}Muscle Groups!{% endblock %}</title>
+  </head>
+  <body>
+    {% block body %}
+      <ul>
+        {% if musclegroups %}
+           {% for musclegroup in musclegroups %}
+              <li>{{ musclegroup.name }}
+           {% endfor %}
+        {% else %}
+           <li>No msucle groups!
+        {% endif %}
+      </ul>
+    {% endblock %}
+  </body>
+</html>

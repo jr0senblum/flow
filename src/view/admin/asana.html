@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>{% block title %}Asana!{% endblock %}</title>
+  </head>
+  <body>
+    {% block body %}
+      <ul>
+        {% if asana %}
+              <li>{{ asana.name }}
+              <li>{{ mg.name }}
+        {% else %}
+           <li>No asana!
+        {% endif %}
+      </ul>
+    {% endblock %}
+  </body>
+</html>

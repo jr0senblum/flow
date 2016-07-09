@@ -1,4 +1,4 @@
--module(asana_ranges, [Id, AsanaId, RangeOfMotionId]).
+-module(asana_range, [Id, AsanaId, RangeOfMotionId]).
 -compile(export_all).
 
 -belongs_to(asana).

@@ -49,7 +49,8 @@ create_table (Nodes, Table, Attribs) ->
 
 -define (MUSCLE_GROUPS, lists:sort(["Quardriceps", "Hamstrings", "Calves", 
                                     "Chest", "Back", "Shoulders", "Triceps", 
-                                    "Biceps", "Forearms", "Trapezius", "Abs"])).
+                                    "Biceps", "Forearms", "Trapezius", "Abs",
+                                    "Groin"])).
 
 -define (JOINTS, lists:sort(["Neck", "Intervertabral", "Shoulder", "Elbow", 
                                "Wrist", "Sacroiliac", "Hip", "Knee", "Ankle"])).
@@ -71,7 +72,28 @@ seed() ->
     seed_group(level, ?LEVELS),
     seed_group(range_of_motion, [J:name() ++ ": " ++ R:name() || 
                                     J <- boss_db:find(joint,[]),
-                                    R <- boss_db:find(motion_type,[])]).
+                                    R <- boss_db:find(motion_type,[])]),
+    seed_asana ().
+
+seed_asana() ->
+    [reset_group_id(T) || T <- [asana, asana_mg, asana_range]],
+    [delete_all_existing(T, boss_db:find_first(T, [])) || T <- [asana, asana_mg, asana_range]],
+
+    
+    B = asana:new(id, "Chair", "Utkatasana", true, false, true),
+    B:save(),
+    A = asana:new(id, "Firefly", "Tittibhasana", true, true, true),
+    {ok, Asana} = A:save(),
+
+    MgIds = [(boss_db:find_first(muscle_group, [{name, equals, MuscleGroup}])):id() ||
+                MuscleGroup <- ["Hamstrings", "Chest", "Forearms", "Back", "Abs"]],
+    Ranges = [(boss_db:find_first(range_of_motion, [{name, equals, Range}])):id() ||
+                Range <- ["Hip: Transversal Open"]],
+
+
+    [(asana_mg:new(id, Asana:id(), M)):save() || M <- MgIds],
+    [(asana_range:new(id, Asana:id(), R)):save() || R <- Ranges].        
+
 
 
 seed_group(Table, Data) ->

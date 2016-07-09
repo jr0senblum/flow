@@ -11,7 +11,12 @@ muscle_group_list('GET', []) ->
     {ok, [{musclegroups, MuscleGroups}]}.
 
 asana('GET', []) ->
-    Asana = boss_db:find_first(asana, []),
-    MgId = asana_mg:muscle_group_id(Asana:first_asana_mg()),
-    MuscleGroup = boss_db:find_first(muscle_group, [{id, equals, MgId}]),
-    {ok, [{asana, Asana}, {mg, MuscleGroup}]}.
+    {ok, []};
+asana('GET', ["all"]) ->
+    Asanas = boss_db:find(asana, []),
+    {json, [{asanas, Asanas}]}.
+
+musclegroups('GET', [AsanaId, "musclegroups"]) ->
+    Asana = boss_db:find(AsanaId),
+    {json, [{mg, Asana:muscle_group_objects()}]}.
+

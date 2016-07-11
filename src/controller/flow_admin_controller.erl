@@ -16,7 +16,13 @@ asana('GET', ["all"]) ->
     Asanas = boss_db:find(asana, []),
     {json, [{asanas, Asanas}]}.
 
-musclegroups('GET', [AsanaId, "musclegroups"]) ->
+details('GET', [AsanaId]) ->
     Asana = boss_db:find(AsanaId),
-    {json, [{mg, Asana:muscle_group_objects()}]}.
-
+    Mg = Asana:muscle_group_objects(),
+    Rom = Asana:range_objects(),
+    Enters = Asana:enters_from(),
+    Exits =  Asana:exits_to(),
+    {json, [{mg, Mg},
+            {rom, Rom},
+            {enters, Enters},
+            {exits, Exits}]}.

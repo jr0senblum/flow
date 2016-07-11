@@ -76,19 +76,31 @@ seed() ->
     seed_asana ().
 
 seed_asana() ->
-    [reset_group_id(T) || T <- [asana, asana_mg, asana_range]],
-    [delete_all_existing(T, boss_db:find_first(T, [])) || T <- [asana, asana_mg, asana_range]],
+    [reset_group_id(T) || T <- [asana, asana_mg, asana_range, enter_from]],
+    [delete_all_existing(T, boss_db:find_first(T, [])) || T <- [asana, asana_mg, asana_range, enter_from]],
 
     
-    B = asana:new(id, "Chair", "Utkatasana", true, false, true),
-    B:save(),
     A = asana:new(id, "Firefly", "Tittibhasana", true, true, true),
     {ok, Asana} = A:save(),
+
+    B = asana:new(id, "Chair", "Utkatasana", true, false, true),
+    {ok, Basana} = B:save(),
+
+    C = asana:new(id, "Triangle", "Trikonasana", false, true, false),
+    {ok, Casana} = C:save(),
+
+    EF = enter_from:new(id, Basana:id(), Asana:id()),
+    EF:save(),
+
+    FG = enter_from:new(id, Casana:id(), Basana:id()),
+    FG:save(),
+
 
     MgIds = [(boss_db:find_first(muscle_group, [{name, equals, MuscleGroup}])):id() ||
                 MuscleGroup <- ["Hamstrings", "Chest", "Forearms", "Back", "Abs"]],
     Ranges = [(boss_db:find_first(range_of_motion, [{name, equals, Range}])):id() ||
                 Range <- ["Hip: Transversal Open"]],
+
 
 
     [(asana_mg:new(id, Asana:id(), M)):save() || M <- MgIds],

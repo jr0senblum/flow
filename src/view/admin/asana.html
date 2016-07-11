@@ -5,48 +5,116 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    
     <title>Flow!</title>
-
+    
     <meta name="description" content="Source code generated using layoutit.com">
     <meta name="author" content="LayoutIt!">
-
+    
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
-
+    <link href="/static/css/chosen.min.css" rel="stylesheet">
+    
   </head>
   <body>
+    
 
     <div class="container-fluid">
       <div class="row">
 	<div class="col-md-12">
 	  <div class="page-header">
-	    <h1>
-	      Flow <small> ... asina for creativity</small>
-	    </h1>
+	    <h1> Flow <small> ... asina for creativity</small> </h1>
 	  </div>
 	</div>
       </div>
       <div class="row">
-        <div class="col-md-6">
+	<div class="col-md-12">
+	  <h3 class="text-primary text-left"></h3>
+
+          <div class="col-md-4">
+	    <h3 class="text-left text-warning"> Enter From</h3>
+
+<select id="froms" data-placeholder="Choose" style="width:350px;" 
+         multiple class="chosen-select">
+  <option value='111'>what</option>
+  </select>
+
+	    
+	    <table id="enterfrom" class="table table-condensed table-hover table-striped">
+	      <thead>
+		<tr>
+		  <th>
+		    Id 
+		  </th>
+		  <th>
+                    Name
+		  </th>
+		  <th>
+		    Sanskrit
+		  </th>
+		</tr>
+	      </thead>
+	      <tbody>
+	      </tbody>
+	    </table>
+	  </div>
+	<div class="col-md-4">
+	  <h3 id="ename" class="text-center text-success"> </h3>
+ 
+          
+          <div class="btn-group">
+	    <button class="btn btn-default" type="button" onclick="toggleStrength()">
+	      <em id="strength" class={% if asana.strength %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Strength
+	    </button>
+	    <button class="btn btn-default" type="button" onclick="toggleBallance()">
+	      <em id="ballance" class={% if asana.ballance %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Ballance
+	    </button>
+	    <button  class="btn btn-default" type="button" onclick="toggleFlexibility()">
+	      <em id="flexibility" class={% if asana.flexibility %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Flexibility
+	    </button> 
+	  </div>
+          
+          <div> <img id="pic"  alt="Asana Picture" src={{ path }}></div>
+	  <div class="btn-group">
+	    <button id="left" class="btn btn-default" type="button" onclick="previous()">
+	      <em class="glyphicon glyphicon-chevron-left" ></em> Previous
+	    </button>
+	    <button id="right" class="btn btn-default" type="button" onclick="next()">
+	      <em  class="glyphicon glyphicon-chevron-right" ></em> Next
+	    </button>
+            
+	  </div>
+	</div>
+
+        <div class="col-md-4">
+	  <h3 class="text-warning"> Exit To </h3>
+	    <table id="exitto" class="table table-condensed table-hover table-striped">
+	      <thead>
+		<tr>
+		  <th>
+		    Id 
+		  </th>
+		  <th>
+                    Name
+		  </th>
+		  <th>
+		    Sanskrit
+		  </th>
+		</tr>
+	      </thead>
+	      <tbody>
+	      </tbody>
+	    </table>
+        </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+	<div class="col-md-6">
 	  <div class="row">
-            <div class="col-md-12">
-              <h3 id="ename" class="text-primary text-left"> {{ asana.name }}  - {{ asana.sanskrit }} </h3>
-              <div class="btn-group">
-	        <button class="btn btn-default" type="button" onclick="toggleStrength()">
-	          <em id="strength" class={% if asana.strength %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Strength
-	        </button>
-	        <button class="btn btn-default" type="button" onclick="toggleBallance()">
-	          <em id="ballance" class={% if asana.ballance %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Ballance
-	        </button>
-	        <button  class="btn btn-default" type="button" onclick="toggleFlexibility()">
-	          <em id="flexibility" class={% if asana.flexibility %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Flexibility
-	        </button> 
-	      </div>
-            </div>
-          </div>
-          <img id="pic"  alt="Asana Picture" src={{ path }}>
-          <table class="table table-condensed table-striped">
+
+	  </div>
+	  <table id="mg" class="table table-condensed table-striped">
 	    <thead>
 	      <tr>
 	        <th>
@@ -55,47 +123,41 @@
 	      </tr>
 	    </thead>
 	    <tbody>
-              {% if mg %}
-              {% for m in mg %}
-	      <tr class="active">
-	        <td> {{ m.name }}</td>
-	      </tr>
-              {% endfor %}
-              {% endif %}    
 	    </tbody>
 	  </table>
+	</div>
+	<div class="col-md-6">
+	  <div class="row">
 
-          <table class="table table-condensed table-striped">
+	  </div>
+	  <table id="rom" class="table table-condensed table-striped">
 	    <thead>
 	      <tr>
 	        <th>
-		  Ranges of Motion
+		  Joints and Ranges
 	        </th>
 	      </tr>
 	    </thead>
 	    <tbody>
-              {% if rom %}
-              {% for r in rom %}
-	      <tr class="success">
-	        <td> {{ r.name }}</td>
-	      </tr>
-              {% endfor %}
-              {% endif %}    
 	    </tbody>
 	  </table>
-        </div>
+	</div>
       </div>
       <div class="row">
-        <div class="col-md-12">
-        </div>
+	<div class="col-md-12">
+	</div>
       </div>
     </div>
 
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/scripts.js"></script>
 
-    <script>
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/chosen.jquery.min.js"></script>
+
+
+
+  <script>
 
 $( document ).ready(function() {
   console.log( "ready!" );
@@ -107,6 +169,23 @@ $( document ).ready(function() {
 var asanas = new Array();
 var current = 0;
 
+
+function next() {
+  if (current < asanas.length) {
+    current = current + 1;
+    displayAsana();
+    getDetails();
+  }};
+
+function previous() {
+  if (current > 0) {
+    current = current - 1;
+    displayAsana();
+    getDetails();
+  }};
+
+
+
 function loadAllAsana() {
   $.ajax("/admin/asana/all",
          { cache: false,
@@ -114,7 +193,88 @@ function loadAllAsana() {
              asanas = data.asanas;
              current = 0;
              displayAsana();
+             getDetails();
            }})};
+
+
+function getDetails() {
+  $.ajax("/admin/details/" + asanas[current].id,
+         { cache: false,
+           success: function(data, code, xhr) {
+             loadMgs(data.mg);
+             loadRanges(data.rom);
+             loadEnters(data.enters);
+             loadExits(data.exits)}
+         })
+};
+
+function loadMgs(groups) {
+  var Rows = "";
+  $('#mg tbody').empty()
+  for (i = 0; i < groups.length; i++) {
+    Rows = Rows + 
+      "<tr class='success'>" +
+      "<td>" + groups[i].name + "</td></tr>";
+  };
+  $('#mg > tbody:last-child').append(Rows);
+};
+
+
+function loadRanges(ranges) {
+  var Rows = "";
+  $('#rom tbody').empty()
+  for (i = 0; i < ranges.length; i++) {
+    Rows = Rows + 
+      "<tr class='success'>" +
+      "<td>" + ranges[i].name + "</td></tr>";
+  };
+  $('#rom > tbody:last-child').append(Rows);
+};
+
+
+function loadEnters(enters) {
+  var Rows = "";
+  var Found = new Array();
+  
+  for (i = 0; i < enters.length; i++) {
+    Rows = Rows + 
+      '<option value="' + enters[i].id + '" selected>' + 
+      enters[i].name + '</option>';
+    Found.push(enters[i].id);
+  };
+  $('#froms').html(Rows);
+
+  Rows = "";
+  for (i = 0; i < asanas.length; i++) {
+    if (Found.indexOf(asanas[i].id) == -1) {
+      Rows = Rows + 
+        '<option value="' + asanas[i].id + '">' + 
+        asanas[i].name + '</option>';
+    };
+  };
+  $('#froms').append(Rows);
+
+  $("#froms").trigger("chosen:updated")
+};
+
+
+
+
+
+function loadExits(exits) {
+  var Rows = "";
+  $('#exitto tbody').empty()
+  for (i = 0; i < exits.length; i++) {
+    Rows = Rows + 
+      "<tr class='success'>" +
+        "<td>" + exits[i].id + "</td>" +
+        "<td>" + exits[i].name + "</td>" +
+        "<td>" + exits[i].sanskrit + "</td>" +
+      "</tr>";
+  };
+  $('#exitto > tbody:last-child').append(Rows);
+};
+
 
 function displayAsana() {
   $("#ename").text(asanas[current].name + " - " + asanas[current].sanskrit);
@@ -143,7 +303,7 @@ function displayAsana() {
     $("#flexibility").addClass("glyphicon-remove");
   };
 
-  $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name + ".jpg");
+  $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
 
 }
 
@@ -162,14 +322,25 @@ function toggleBallance() {
   displayAsana();
 }
   
-  
+function availableTags(term, suggest) {
+  var suggestions = [];
+  for (i=0; i <asanas.length; i ++) {
+    if (~(asanas[i].name+' '+asanas[i].sanskrit).toLowerCase().indexOf(term.term.toLowerCase()))
+      suggestions.push(asanas[i]);
+    suggest(suggestions);
+  }};
+
+
+
+$("#froms").chosen();
+
+
+
 </script>
 
 
 
   </body>
-
-
 
 
 

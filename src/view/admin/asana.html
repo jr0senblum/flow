@@ -32,37 +32,16 @@
 	  <h3 class="text-primary text-left"></h3>
 
           <div class="col-md-4">
-	    <h3 class="text-left text-warning"> Enter From</h3>
+	    <h3 class="text-left text-warning"> Enters From</h3>
 
-<select id="froms" data-placeholder="Choose" style="width:350px;" 
-         multiple class="chosen-select">
-  <option value='111'>what</option>
-  </select>
+            <select id="froms" data-placeholder="Choose" style="width:350px;" 
+                    multiple class="chosen-select">
+            </select>
 
-	    
-	    <table id="enterfrom" class="table table-condensed table-hover table-striped">
-	      <thead>
-		<tr>
-		  <th>
-		    Id 
-		  </th>
-		  <th>
-                    Name
-		  </th>
-		  <th>
-		    Sanskrit
-		  </th>
-		</tr>
-	      </thead>
-	      <tbody>
-	      </tbody>
-	    </table>
 	  </div>
 	<div class="col-md-4">
 	  <h3 id="ename" class="text-center text-success"> </h3>
- 
-          
-          <div class="btn-group">
+           <div class="btn-group">
 	    <button class="btn btn-default" type="button" onclick="toggleStrength()">
 	      <em id="strength" class={% if asana.strength %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Strength
 	    </button>
@@ -82,29 +61,25 @@
 	    <button id="right" class="btn btn-default" type="button" onclick="next()">
 	      <em  class="glyphicon glyphicon-chevron-right" ></em> Next
 	    </button>
+	    <button id="reset" class="btn btn-default" type="button" onclick="reset()">
+	      <em  class="glyphicon glyphicon-refresh" ></em> Reset
+	    </button>
+	    <button  class="btn btn-default" type="button" onclick="saveCurrent()">
+	      <em  id="save" class="glyphicon glyphicon-saved" ></em> Save
+	    </button>
             
 	  </div>
 	</div>
 
         <div class="col-md-4">
-	  <h3 class="text-warning"> Exit To </h3>
-	    <table id="exitto" class="table table-condensed table-hover table-striped">
-	      <thead>
-		<tr>
-		  <th>
-		    Id 
-		  </th>
-		  <th>
-                    Name
-		  </th>
-		  <th>
-		    Sanskrit
-		  </th>
-		</tr>
-	      </thead>
-	      <tbody>
-	      </tbody>
-	    </table>
+          <div class="col-md-4">
+	    <h3 class="text-left text-warning"> Exits To</h3>
+
+            <select id="tos" data-placeholder="Choose" style="width:350px;" 
+                    multiple class="chosen-select">
+            </select>
+
+	  </div>
         </div>
         </div>
       </div>
@@ -155,43 +130,79 @@
   <script src="/static/js/scripts.js"></script>
   <script src="/static/js/chosen.jquery.min.js"></script>
 
-
-
   <script>
+  $( document ).ready(function() {
+    loadAllAsana(0);
+    toggleSave(true);
+  });
 
-$( document ).ready(function() {
-  console.log( "ready!" );
-  loadAllAsana();
-});
-
+$("#froms").chosen();
+$("#tos").chosen();
 
 
 var asanas = new Array();
 var current = 0;
 
+function reset() {
+  loadAllAsana(current);
+};
+
+function toggleSave(state) {
+  if (state == true) {
+    $("#save").removeClass("glyphicon-save");
+    $("#save").addClass("glyphicon-saved");
+    setNextPrevStatus();
+  } else {
+    $("#save").removeClass("glyphicon-saved");
+    $("#save").addClass("glyphicon-save");
+    toggleButtonStatus($('#left'), true);
+    toggleButtonStatus($('#right'), true);
+  }};
+
+function saveCurrent() {
+  $.post("/admin/asana/update",
+         {new_asana:JSON.stringify(asanas[current])},
+         function(data,status) { });
+  toggleSave(true);
+};
+
 
 function next() {
-  if (current < asanas.length) {
+  if (current < asanas.length - 1) {
     current = current + 1;
     displayAsana();
     getDetails();
-  }};
+  };
+  setNextPrevStatus();
+};
 
 function previous() {
   if (current > 0) {
     current = current - 1;
     displayAsana();
     getDetails();
-  }};
+  };
+  setNextPrevStatus();
+};
 
 
+function toggleButtonStatus(a_button, state) {
+  a_button.prop("disabled", state);
+};
 
-function loadAllAsana() {
+function setNextPrevStatus() {
+  toggleButtonStatus($('#right'), (current == asanas.length - 1));
+  toggleButtonStatus($('#left'), (current == 0));
+};
+
+
+function loadAllAsana(NewCurrent) {
   $.ajax("/admin/asana/all",
          { cache: false,
            success: function(data, code, xhr) {
              asanas = data.asanas;
-             current = 0;
+             current = NewCurrent;
+             toggleSave(true);
              displayAsana();
              getDetails();
            }})};
@@ -246,34 +257,41 @@ function loadEnters(enters) {
 
   Rows = "";
   for (i = 0; i < asanas.length; i++) {
-    if (Found.indexOf(asanas[i].id) == -1) {
+    if (Found.indexOf(asanas[i].id) == -1 && i != current) {
       Rows = Rows + 
         '<option value="' + asanas[i].id + '">' + 
         asanas[i].name + '</option>';
     };
   };
   $('#froms').append(Rows);
-
   $("#froms").trigger("chosen:updated")
 };
 
 
-
-
-
 function loadExits(exits) {
   var Rows = "";
-  $('#exitto tbody').empty()
+  var Found = new Array();
+  
   for (i = 0; i < exits.length; i++) {
     Rows = Rows + 
-      "<tr class='success'>" +
-        "<td>" + exits[i].id + "</td>" +
-        "<td>" + exits[i].name + "</td>" +
-        "<td>" + exits[i].sanskrit + "</td>" +
-      "</tr>";
+      '<option value="' + exits[i].id + '" selected>' + 
+      exits[i].name + '</option>';
+    Found.push(exits[i].id);
   };
-  $('#exitto > tbody:last-child').append(Rows);
+  $('#tos').html(Rows);
+
+  Rows = "";
+  for (i = 0; i < asanas.length; i++) {
+    if (Found.indexOf(asanas[i].id) == -1 && i != current) {
+      Rows = Rows + 
+        '<option value="' + asanas[i].id + '">' + 
+        asanas[i].name + '</option>';
+    };
+  };
+  $('#tos').append(Rows);
+  $("#tos").trigger("chosen:updated")
 };
+
 
 
 function displayAsana() {
@@ -305,34 +323,28 @@ function displayAsana() {
 
   $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
 
-}
+};
 
 function toggleStrength() {
   asanas[current].strength = ! asanas[current].strength ;
   displayAsana();
-}
+  toggleSave(false);
+};
 
 function toggleFlexibility() {
   asanas[current].flexibility = ! asanas[current].flexibility ;
   displayAsana();
-}
+  toggleSave(false);
+};
 
 function toggleBallance() {
   asanas[current].ballance = ! asanas[current].ballance ;
   displayAsana();
+  toggleSave(false);
 }
   
-function availableTags(term, suggest) {
-  var suggestions = [];
-  for (i=0; i <asanas.length; i ++) {
-    if (~(asanas[i].name+' '+asanas[i].sanskrit).toLowerCase().indexOf(term.term.toLowerCase()))
-      suggestions.push(asanas[i]);
-    suggest(suggestions);
-  }};
 
 
-
-$("#froms").chosen();
 
 
 

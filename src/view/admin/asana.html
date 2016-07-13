@@ -27,19 +27,19 @@
       <div class="row">
 	<div class="col-md-12">
 	  <h3 class="text-primary text-left"></h3>
-
+          `
           <div class="col-md-4">
-	    <h3 class="text-left text-warning"> Enters From</h3>
-
-            <select id="froms" data-placeholder="Choose" style="width:350px;" 
+	    <h3 class="text-left text-info">Enters from...</h3>
+            
+            <select id="froms" data-placeholder="Choose asanas..." style="width:350px;" 
                     multiple class="chosen-select">
             </select>
 
 	  </div>
-	<div class="col-md-4">
-	  <h3 id="ename" class="text-center text-success"> </h3>
-           <div class="btn-group">
-	    <button class="btn btn-default" type="button" onclick="toggleAttribute('strength')">
+	  <div class="col-md-4">
+	  <h3 id="ename" class="text-left text-success"> </h3>
+          <div class="btn-group">
+	     <button class="btn btn-default" type="button" onclick="toggleAttribute('strength')">
 	      <em id="strength" class={% if asana.strength %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Strength
 	    </button>
 	    <button class="btn btn-default" type="button" onclick="toggleAttribute('ballance')">
@@ -48,78 +48,74 @@
 	    <button  class="btn btn-default" type="button" onclick="toggleAttribute('flexibility')">
 	      <em id="flexibility" class={% if asana.flexibility %} "glyphicon glyphicon-ok" {% else %} "glyphicon glyphicon-remove" {% endif %} ></em> Flexibility
 	    </button> 
-	  </div>
+	   </div>
           
-          <div> <img id="pic"  alt="Asana Picture" src={{ path }}></div>
-	  <div class="btn-group">
-	    <button id="left" class="btn btn-default" type="button" onclick="previous()">
-	      <em class="glyphicon glyphicon-chevron-left" ></em> Previous
-	    </button>
-	    <button id="right" class="btn btn-default" type="button" onclick="next()">
-	      <em  class="glyphicon glyphicon-chevron-right" ></em> Next
-	    </button>
-	    <button id="reset" class="btn btn-default" type="button" onclick="reset()">
-	      <em  class="glyphicon glyphicon-refresh" ></em> Reset
-	    </button>
-	    <button  id="savebutton"class="btn btn-default" type="button" onclick="saveCurrent()">
-	      <em  id="save" class="glyphicon glyphicon-saved" ></em> Save
-	    </button>
-            
-	  </div>
+           <div> <img id="pic"  alt="Asana Picture" src={{ path }}></div>
+	   <div class="btn-group">
+	     <button id="left" class="btn btn-default" type="button" onclick="previous()">
+	       <em class="glyphicon glyphicon-chevron-left" ></em> Previous
+	     </button>
+	     <button id="right" class="btn btn-default" type="button" onclick="next()">
+	       <em  class="glyphicon glyphicon-chevron-right" ></em> Next
+	     </button>
+	     <button id="reset" class="btn btn-default" type="button" onclick="reset()">
+	       <em  class="glyphicon glyphicon-refresh" ></em> Reset
+	     </button>
+	     <button  id="savebutton"class="btn btn-default" type="button" onclick="saveCurrent()">
+	       <em  id="save" class="glyphicon glyphicon-saved" ></em> Save
+	     </button>
+             
+	   </div>
 	</div>
-
+        
         <div class="col-md-4">
           <div class="col-md-4">
-	    <h3 class="text-left text-warning"> Exits To</h3>
-
-            <select id="tos" data-placeholder="Choose" style="width:350px;" 
-                    multiple class="chosen-select">
+	    <h3 class="text-left text-info"> Exits to...</h3>
+            <select id="tos" data-placeholder="Choose asanas..." style="width:350px;" 
+                    multiple class="chosen"> 
             </select>
-
-	  </div>
+          </div>
         </div>
         </div>
       </div>
     </div>
     <div class="row">
-	<div class="col-md-6">
-	  <div class="row">
-
-	  </div>
-	  <table id="mg" class="table table-condensed table-striped">
-	    <thead>
-	      <tr>
-	        <th>
-		  Major Muscle Groups
-	        </th>
-	      </tr>
-	    </thead>
-	    <tbody>
-	    </tbody>
-	  </table>
+      <div class="col-md-6">
+	<div class="row">            
 	</div>
-	<div class="col-md-6">
-	  <div class="row">
-
-	  </div>
-	  <table id="rom" class="table table-condensed table-striped">
-	    <thead>
-	      <tr>
-	        <th>
-		  Joints and Ranges
-	        </th>
-	      </tr>
-	    </thead>
-	    <tbody>
-	    </tbody>
-	  </table>
-	</div>
+        <table id="mg" class="table table-condensed table-striped tableSection">
+	  <thead>
+	    <tr>
+	      <th>
+		Major Muscle Groups
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody> 
+	  </tbody> 
+	</table>
       </div>
-      <div class="row">
-	<div class="col-md-12">
+      <div class="col-md-6">
+        <div class="row">
 	</div>
+	<table id="rom" class="table table-condensed table-striped tableSection">
+	  <thead>
+	    <tr>
+	      <th>
+		Joints and Ranges
+	      </th>
+	      </tr>
+	  </thead>
+	  <tbody>
+	  </tbody>
+	</table>
       </div>
     </div>
+    <div class="row">
+      <div class="col-md-12">
+      </div>
+    </div>
+</div>
 
 
   <script src="/static/js/jquery.min.js"></script>
@@ -127,13 +123,14 @@
   <script src="/static/js/chosen.jquery.min.js"></script>
 
   <script>
+
   $(document).ready(function() {
     loadAllAsana(0);
     setSaveButton(true);
   });
 
-// Attach the chosen jquery plug-in to the select-boxes.
 
+// Attach the chosen jquery plug-in to the select-boxes.
 
 $("#tos").chosen().change(function() {
      setSaveButton(false);
@@ -182,10 +179,15 @@ function setSaveButton(state) {
 function saveCurrent() {
   var fs = collectTransitions($("#froms option"));
   var es = collectTransitions($("#tos option"));
+  var mmg = collectAnatomy($("#mg tbody .success td"));
+  var rom = collectAnatomy($("#rom tbody .success td"));
+
   $.post("/admin/asana/update",
          {new_asana:JSON.stringify(asanas[current]),
           from_asanas:JSON.stringify(fs),
-          to_asanas:JSON.stringify(es)},
+          to_asanas:JSON.stringify(es),
+          mmgs:JSON.stringify(mmg),
+          roms:JSON.stringify(rom)},
          function(data,status) { });
   setSaveButton(true);
 };
@@ -197,6 +199,16 @@ function collectTransitions(select) {
   }
   return (selected);
 };
+
+function collectAnatomy(rows) {
+  var selected=[];
+  for (var i = 0; i < rows.length; i++) {
+    selected.push(rows[i].getAttribute("value"));
+  }
+  return (selected);
+}
+  
+
 
 
 
@@ -232,24 +244,47 @@ function getDetails() {
   $.ajax("/admin/related/" + asanas[current].id,
          { cache: false,
            success: function(data, code, xhr) {
-             loadAnatomy(data.mg, '#mg');
-             loadAnatomy(data.rom, '#rom');
+             loadAnatomy(data.mg, data.allmg, '#mg');
+             loadAnatomy(data.rom, data.allrom, '#rom');
              loadEntersAndExits(data.enters, $('#froms'));
              loadEntersAndExits(data.exits, $('#tos'));
          }})};
 
 
 // Load either range of motion or musclegroup tables.
-function loadAnatomy(groups, accessor) {
+function loadAnatomy(groups, all, accessor) {
   var Rows = "";
+  var Found = new Array();
   $(accessor + ' tbody').empty()
   for (i = 0; i < groups.length; i++) {
+    Found.push(groups[i].id);
     Rows = Rows + 
-      "<tr class='success'>" +
-      "<td>" + groups[i].name + "</td></tr>";
+      "<tr class='success' onclick='sel(this)'>" +
+      "<td value='"+groups[i].id+"'>" + groups[i].name + " </td></tr>";
+  };
+  for (i = 0; i < all.length; i++) {
+    if (Found.indexOf(all[i].id) == -1 ) {
+      Rows = Rows + 
+      "<tr class='active' onclick='sel(this)';>" +
+      "<td value='"+all[i].id+"'>" + all[i].name + " </td></tr>";
+    }
   };
   $(accessor + ' > tbody:last-child').append(Rows);
 };
+
+function sel(n) {
+  var Component = $(n);
+  if (Component.hasClass("success")) {
+    Component.removeClass("success");
+    Component.addClass("active")
+  } else {
+    Component.removeClass("active");
+    Component.addClass("success")
+  }
+  setSaveButton(false);
+}
+
+
 
 // Load either entering or exiting asana select boxes.
 function loadEntersAndExits(enters, control) {

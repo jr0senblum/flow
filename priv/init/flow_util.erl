@@ -76,8 +76,9 @@ seed() ->
     seed_asana ().
 
 seed_asana() ->
-    [reset_group_id(T) || T <- [asana, asana_mg, asana_range, enter_from]],
-    [delete_all_existing(T, boss_db:find_first(T, [])) || T <- [asana, asana_mg, asana_range, enter_from]],
+    Tables =  [asana, asana_mg, asana_range, enter_from, exit_to],
+    [reset_group_id(T) || T <- Tables],
+    [delete_all_existing(T, boss_db:find_first(T, [])) || T <- Tables],
 
     
     A = asana:new(id, "Firefly", "Tittibhasana", true, true, true),
@@ -95,12 +96,16 @@ seed_asana() ->
     FG = enter_from:new(id, Casana:id(), Basana:id()),
     FG:save(),
 
+    ET0 = exit_to:new(id, Asana:id(), Basana:id()),
+    ET0:save(),
+
+    ET1 = exit_to:new(id, Basana:id(), Casana:id()),
+    ET1:save(),
 
     MgIds = [(boss_db:find_first(muscle_group, [{name, equals, MuscleGroup}])):id() ||
                 MuscleGroup <- ["Hamstrings", "Chest", "Forearms", "Back", "Abs"]],
     Ranges = [(boss_db:find_first(range_of_motion, [{name, equals, Range}])):id() ||
                 Range <- ["Hip: Transversal Open"]],
-
 
 
     [(asana_mg:new(id, Asana:id(), M)):save() || M <- MgIds],

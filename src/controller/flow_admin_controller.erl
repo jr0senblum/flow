@@ -6,7 +6,7 @@
 asana('GET', []) ->
     {ok, []};
 asana('GET', ["all"]) ->
-    Asanas = boss_db:find(asana, []),
+    Asanas = boss_db:find(asana, [], [{order_by, name}]),
     {json, [{asanas, Asanas}]};
 asana('POST', ["update"]) ->
     UpdatedAsana = update_asana(Req:post_param(<<"new_asana">>)),

@@ -20,14 +20,12 @@
       <div class="row">
 	<div class="col-md-12">
 	  <div class="page-header">
-	    <h1> Flow <small> ... asina for creativity</small> </h1>
+	    <h1> Flow <small> ... asana for creativity</small> </h1>
 	  </div>
 	</div>
       </div>
       <div class="row">
 	<div class="col-md-12">
-	  <h3 class="text-primary text-left"></h3>
-          `
           <div class="col-md-4">
 	    <h3 class="text-left text-info">Enters from...</h3>
             
@@ -130,129 +128,58 @@
   });
 
 
-// Attach the chosen jquery plug-in to the select-boxes.
-
+// Attach the Chosen jquery plug-in to the select-boxes.
 $("#tos").chosen().change(function() {
-     setSaveButton(false);
-  });
+     setSaveButton(false)
+  })
 
 $("#froms").chosen().change(function() {
-     setSaveButton(false);
-  });
+     setSaveButton(false)
+  })
 
 // Asanas is the array of all asanas, current is the index of the current one.
 var asanas = new Array();
-var currentEnters = new Array();
-
 var current = 0;
 
-function reset() {
-  loadAllAsana(current);
-};
 
-// Load all asana and set the current asana to be the index, NewCurrent.
-function loadAllAsana(NewCurrent) {
+
+// Re/Loading Asana and related information.
+//
+
+
+// Reload the asana from the server and redisplay the current asana.
+function reset() {
+  loadAllAsana(current)
+}
+
+
+// Load all asana and set the current asana to be the index.
+function loadAllAsana(index) {
   $.ajax("/admin/asana/all",
          { cache: false,
            success: function(data, code, xhr) {
              asanas = data.asanas;
-             current = NewCurrent;
+             current = index;
              setSaveButton(true);
-             displayAsana();
-           }})};
-
-function setSaveButton(state) {
-  // change icon and text from save to saved and back again.
-  // state = true indicates that everything has been saved.
-  if (state == true) {
-    $("#save").removeClass("glyphicon-save");
-    $("#save").addClass("glyphicon-saved");
-    $("#savebutton").prop("disabled", state);
-    setNextPrevStatus();
-  } else {
-    $("#save").removeClass("glyphicon-saved");
-    $("#save").addClass("glyphicon-save");
-    $("#savebutton").prop("disabled", state);
-    setNextPrevStatus();
-  }};
-
-function saveCurrent() {
-  var fs = collectTransitions($("#froms option"));
-  var es = collectTransitions($("#tos option"));
-  var mmg = collectAnatomy($("#mg tbody .success td"));
-  var rom = collectAnatomy($("#rom tbody .success td"));
-
-  $.post("/admin/asana/update",
-         {new_asana:JSON.stringify(asanas[current]),
-          from_asanas:JSON.stringify(fs),
-          to_asanas:JSON.stringify(es),
-          mmgs:JSON.stringify(mmg),
-          roms:JSON.stringify(rom)},
-         function(data,status) { });
-  setSaveButton(true);
-};
-
-function collectTransitions(select) {
-  var selected=[];
-  for (var i = 0; i < select.length; i++) {
-    if (select[i].selected) selected.push(select[i].value);
-  }
-  return (selected);
-};
-
-function collectAnatomy(rows) {
-  var selected=[];
-  for (var i = 0; i < rows.length; i++) {
-    selected.push(rows[i].getAttribute("value"));
-  }
-  return (selected);
+             displayAsana()
+           }})
 }
-  
 
 
-
-
-function next() {
-  if (current < asanas.length - 1) {
-    current = current + 1;
-    displayAsana();
-  };
-  setNextPrevStatus();
-};
-
-function previous() {
-  if (current > 0) {
-    current = current - 1;
-    displayAsana();
-  };
-  setNextPrevStatus();
-};
-
-
-function setNextPrevStatus() {
-  // Determine if the next and previous buttons should be enabled.
-  toggleButtonStatus($('#right'), (current == asanas.length - 1));
-  toggleButtonStatus($('#left'), (current == 0));
-};
-
-function toggleButtonStatus(a_button, state) {
-  a_button.prop("disabled", state);
-};
-
-
+// Get related objects to the current asana.
 function getDetails() {
   $.ajax("/admin/related/" + asanas[current].id,
          { cache: false,
            success: function(data, code, xhr) {
-             loadAnatomy(data.mg, data.allmg, '#mg');
-             loadAnatomy(data.rom, data.allrom, '#rom');
-             loadEntersAndExits(data.enters, $('#froms'));
-             loadEntersAndExits(data.exits, $('#tos'));
-         }})};
+             populateAnatomy(data.mg, data.allmg, '#mg');
+             populateAnatomy(data.rom, data.allrom, '#rom');
+             populateEntersAndExits(data.enters, $('#froms'));
+             populateEntersAndExits(data.exits, $('#tos'))
+         }})}
 
 
-// Load either range of motion or musclegroup tables.
-function loadAnatomy(groups, all, accessor) {
+// Populate either range of motion or musclegroup tables.
+function populateAnatomy(groups, all, accessor) {
   var Rows = "";
   var Found = new Array();
   $(accessor + ' tbody').empty()
@@ -268,26 +195,13 @@ function loadAnatomy(groups, all, accessor) {
       "<tr class='active' onclick='sel(this)';>" +
       "<td value='"+all[i].id+"'>" + all[i].name + " </td></tr>";
     }
-  };
-  $(accessor + ' > tbody:last-child').append(Rows);
-};
-
-function sel(n) {
-  var Component = $(n);
-  if (Component.hasClass("success")) {
-    Component.removeClass("success");
-    Component.addClass("active")
-  } else {
-    Component.removeClass("active");
-    Component.addClass("success")
   }
-  setSaveButton(false);
+  $(accessor + ' > tbody:last-child').append(Rows)
 }
 
 
-
-// Load either entering or exiting asana select boxes.
-function loadEntersAndExits(enters, control) {
+// Populate either entering or exiting asana select boxes.
+function populateEntersAndExits(enters, control) {
   var Rows = "";
   var Found = new Array();
   
@@ -305,11 +219,128 @@ function loadEntersAndExits(enters, control) {
       Rows = Rows + 
         '<option value="' + asanas[i].id + '">' + 
         asanas[i].name + '</option>';
-    };
-  };
+    }
+  }
   control.append(Rows);
   control.trigger("chosen:updated")
-};
+}
+
+
+
+// Button State Management
+//
+
+function setSaveButton(state) {
+  // change icon and text from save to saved and back again.
+  // state = true indicates that everything has been saved.
+  if (state == true) {
+    $("#save").removeClass("glyphicon-save").addClass("glyphicon-saved");
+    $("#savebutton").prop("disabled", state);
+    setNextPrevStatus()
+  } else {
+    $("#save").removeClass("glyphicon-saved").addClass("glyphicon-save");
+    $("#savebutton").prop("disabled", state);
+    setNextPrevStatus()
+  }}
+
+
+function notAllSaved() {
+  return $("#save").hasClass("glyphicon-save")
+}
+
+
+function setNextPrevStatus() {
+  var all_saved = notAllSaved();
+  toggleButtonStatus($('#right'), ((current == asanas.length - 1) || all_saved));
+  toggleButtonStatus($('#left'), ((current == 0) || all_saved))
+}
+
+
+function toggleButtonStatus(a_button, state) {
+  a_button.prop("disabled", state)
+}
+
+
+function next() {
+  if (current < asanas.length - 1) {
+    current = current + 1;
+    displayAsana();
+  };
+  setNextPrevStatus()
+}
+
+function previous() {
+  if (current > 0) {
+    current = current - 1;
+    displayAsana();
+  };
+  setNextPrevStatus()
+}
+
+
+
+// Saving changes to an asana.
+function saveCurrent() {
+  var fs = collectTransitions($("#froms option"));
+  var es = collectTransitions($("#tos option"));
+  var mmg = collectAnatomy($("#mg tbody .success td"));
+  var rom = collectAnatomy($("#rom tbody .success td"));
+
+  $.post("/admin/asana/update",
+         {new_asana:JSON.stringify(asanas[current]),
+          from_asanas:JSON.stringify(fs),
+          to_asanas:JSON.stringify(es),
+          mmgs:JSON.stringify(mmg),
+          roms:JSON.stringify(rom)},
+         function(data,status) { });
+  setSaveButton(true)
+}
+
+function collectTransitions(select) {
+  var selected=[];
+  for (var i = 0; i < select.length; i++) {
+    if (select[i].selected) selected.push(select[i].value);
+  }
+  return (selected)
+}
+
+function collectAnatomy(rows) {
+  var selected=[];
+  for (var i = 0; i < rows.length; i++) {
+    selected.push(rows[i].getAttribute("value"));
+  }
+  return (selected)
+}
+  
+
+
+
+
+
+
+
+
+
+
+
+
+function sel(n) {
+  var Component = $(n);
+  if (Component.hasClass("success")) {
+    Component.removeClass("success");
+    Component.addClass("active")
+  } else {
+    Component.removeClass("active");
+    Component.addClass("success")
+  };
+  setSaveButton(false);
+ // toggleButtonStatus($('#right'), true);
+//  toggleButtonStatus($('#left'), true)
+}
+
+
+
+
 
 
 
@@ -335,8 +366,10 @@ function setAttributeButton(control, value) {
 function toggleAttribute(attribute) {
   //Toggle strength, Ballance and Flexibility buttons.
   asanas[current][attribute] = ! asanas[current][attribute] ;
-  displayAsana();
+  setAttributeButton($("#"+attribute), asanas[current][attribute]); 
   setSaveButton(false);
+//  toggleButtonStatus($('#right'), true);
+//  toggleButtonStatus($('#left'), true)
 };
 
 

@@ -1,5 +1,5 @@
 -module (flow_util).
--export ([init/0, seed/0]).
+-export ([init/0, seed/0, load_asana/0, kill_asana/0]).
 -compile([{parse_transform, lager_transform}]).
 -define (APPNAME, flow).
 
@@ -73,7 +73,12 @@ seed() ->
     seed_group(range_of_motion, [J:name() ++ ": " ++ R:name() || 
                                     J <- boss_db:find(joint,[]),
                                     R <- boss_db:find(motion_type,[])]),
-    seed_asana ().
+    load_asana().
+
+kill_asana() ->
+    Tables =  [asana, asana_mg, asana_range, enter_from, exit_to],
+    [reset_group_id(T) || T <- Tables],
+    [delete_all_existing(T, boss_db:find_first(T, [])) || T <- Tables].
 
 seed_asana() ->
     Tables =  [asana, asana_mg, asana_range, enter_from, exit_to],
@@ -81,6 +86,7 @@ seed_asana() ->
     [delete_all_existing(T, boss_db:find_first(T, [])) || T <- Tables],
 
     
+
     A = asana:new(id, "Firefly", "Tittibhasana", true, true, true),
     {ok, Asana} = A:save(),
 
@@ -89,6 +95,11 @@ seed_asana() ->
 
     C = asana:new(id, "Triangle", "Trikonasana", false, true, false),
     {ok, Casana} = C:save(),
+
+    E = asana:new(id, "Mountain", "Tadasana", false, false, false),
+    E:save(),
+
+
 
     EF = enter_from:new(id, Basana:id(), Asana:id()),
     EF:save(),
@@ -142,3 +153,21 @@ save_item(Item) ->
                           [Item, Message])
     end.
 
+
+load_asana() ->
+    {ok, Terms} = file:consult("priv/asanas"),
+    [process(X) || X <- lists:sort(Terms)].
+
+process({Name, Sanskrit}) ->
+    N = string:strip(Name),
+    S = string:strip(Sanskrit),
+    case boss_db:find_first(asana,[{name, equals, N}]) of
+        undefined ->
+            A = asana:new(id, N, S, false, false, false),
+            A:save();
+        A ->
+            (A:set([{name,N},{sanskrit,S}])):save()
+    end.
+
+    
+    

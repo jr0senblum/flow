@@ -19,9 +19,42 @@
     <div class="container-fluid">
       <div class="row">
 	<div class="col-md-12">
-	  <div class="page-header">
-	    <h1> Flow <small> ... asana for creativity</small> </h1>
-	  </div>
+          <div class="page-header">
+            <nav class="navbar navbar-default " role="navigation">
+	      <div class="navbar-header">
+	        
+	        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+		  <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+	        </button> <a class="navbar-brand" href="#">FLOW creative</a>
+	      </div>
+	      
+	      <form class="navbar-form navbar-left" id="theSearchForm" role="search" action='javascript:void(0);'>
+	        <div class="form-group">
+		  <input type="text" class="form-control" />
+	        </div> 
+	        <button id="search" type="submit" class="btn btn-default" href="" onclick="gotoAsana()">
+		  Search
+	        </button>
+	        <button id="clear" type="submit" class="btn btn-default" href="" onclick="clearSearch()">
+		  Clear
+	        </button>
+
+	      </form>
+	      <ul class="nav navbar-nav navbar-right">
+	        <li class="dropdown">
+		  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Flows<strong class="caret"></strong></a>
+		  <ul class="dropdown-menu">
+		    <li>
+		      <a href="#">Load Flow</a>
+		    </li>
+		    <li>
+		      <a href="#">Save Flow</a>
+		    </li>
+	          </ul>
+	        </li>
+              </ul>
+	    </nav>
+          
 	</div>
       </div>
       <div class="row">
@@ -234,14 +267,13 @@ function setSaveButton(state) {
   // change icon and text from save to saved and back again.
   // state = true indicates that everything has been saved.
   if (state == true) {
-    $("#save").removeClass("glyphicon-save").addClass("glyphicon-saved");
-    $("#savebutton").prop("disabled", state);
-    setNextPrevStatus()
+    $("#save").removeClass("glyphicon-save").addClass("glyphicon-saved")
   } else {
     $("#save").removeClass("glyphicon-saved").addClass("glyphicon-save");
-    $("#savebutton").prop("disabled", state);
-    setNextPrevStatus()
-  }}
+  };
+  $("#savebutton").prop("disabled", state);
+  setNextPrevStatus()
+}
 
 
 function notAllSaved() {
@@ -252,7 +284,9 @@ function notAllSaved() {
 function setNextPrevStatus() {
   var all_saved = notAllSaved();
   toggleButtonStatus($('#right'), ((current == asanas.length - 1) || all_saved));
-  toggleButtonStatus($('#left'), ((current == 0) || all_saved))
+  toggleButtonStatus($('#left'), ((current == 0) || all_saved));
+  toggleButtonStatus($("#search"), all_saved);
+  toggleButtonStatus($("#clear"), all_saved)
 }
 
 
@@ -334,8 +368,6 @@ function sel(n) {
     Component.addClass("success")
   };
   setSaveButton(false);
- // toggleButtonStatus($('#right'), true);
-//  toggleButtonStatus($('#left'), true)
 }
 
 
@@ -368,10 +400,37 @@ function toggleAttribute(attribute) {
   asanas[current][attribute] = ! asanas[current][attribute] ;
   setAttributeButton($("#"+attribute), asanas[current][attribute]); 
   setSaveButton(false);
-//  toggleButtonStatus($('#right'), true);
-//  toggleButtonStatus($('#left'), true)
 };
 
+
+function gotoAsana() {
+  var match = $("#theSearchForm input").val().toUpperCase().trim();
+  var found = [];
+  var matchCallback = function (pre, cur) {
+    var strName = cur.name.toUpperCase().trim();
+    var strSanskrit = cur.sanskrit.toUpperCase().trim();
+      if ((strName.indexOf(match) > -1) || (strSanskrit.indexOf(match) > -1)) {
+        pre.push(cur);
+        return pre
+      } else {
+        return pre
+      }
+  };
+
+  found = asanas.reduce(matchCallback, new Array());
+  if (found.length != 0) {
+    asanas = found.slice(0);
+    current = 0;
+    displayAsana();
+    setNextPrevStatus()
+  }
+  return false
+}
+
+function clearSearch() {
+  $("#theSearchForm input").val("");
+  loadAllAsana(0)
+}
 
    </script>
  </body>

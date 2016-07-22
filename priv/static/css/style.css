@@ -28,13 +28,13 @@ ul.images {
         margin: 0;
         padding: 0;
         white-space: nowrap;
-        width: 667px;
+#        width: 667px;
         overflow-x: auto;
         background-color: #ddd;
       }
 ul.images li {
         display: inline;
-        width: 150px;
-        height: 150px;
+#        width: 150px;
+#        height: 150px;
       }
 

@@ -1,6 +1,3 @@
-
-
-
 -module(flow_create_controller, [Req]).
 -compile(export_all).
 
@@ -10,15 +7,8 @@ asana('GET', []) ->
     {ok, []};
 asana('GET', ["all"]) ->
     Asanas = boss_db:find(asana, [], [{order_by, name}]),
-    {json, [{asanas, Asanas}]};
-asana('POST', ["update"]) ->
-    UpdatedAsana = update_asana(Req:post_param(<<"new_asana">>)),
-    update_froms(UpdatedAsana, Req:post_param(<<"from_asanas">>)),
-    update_tos(UpdatedAsana, Req:post_param(<<"to_asanas">>)),
-    update_mmgs(UpdatedAsana, Req:post_param(<<"mmgs">>)),
-    update_roms(UpdatedAsana, Req:post_param(<<"roms">>)),
+    {json, [{asanas, Asanas}]}.
 
-    {205, "reset content", []}.
 
 % return the associated objects of a given asana
 related('GET', [AsanaId]) ->
@@ -35,6 +25,18 @@ related('GET', [AsanaId]) ->
             {allrom, AllRom},
             {enters, Enters},
             {exits, Exits}]}.
+
+replacements('GET', [AsanaIdLeft, AsanaIdRight]) ->
+    AsanaLeftExits = sets:from_list((boss_db:find(AsanaIdLeft)):exits_to()),
+    AsanaRightEnters = sets:from_list((boss_db:find(AsanaIdRight)):enters_from()),
+    Works = 
+        sets:to_list(sets:intersection(AsanaLeftExits, AsanaRightEnters)),
+    
+    {json, [{replacements, Works}]}.
+
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

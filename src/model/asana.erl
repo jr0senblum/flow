@@ -47,7 +47,6 @@ replace_exits_to(AsanaList) ->
     [(exit_to:new(id, THIS:id(), AsanaId)):save() || AsanaId <- AsanaList],
     ok.
 
-
 replace_mmgs(MgList) ->
     delete_asana_mmgs(),
     [(asana_mg:new(id, THIS:id(), MgId)):save() || MgId <- MgList],

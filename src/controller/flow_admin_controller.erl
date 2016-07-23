@@ -12,9 +12,11 @@ asana('POST', ["update"]) ->
     UpdatedAsana = update_asana(Req:post_param(<<"new_asana">>)),
     update_froms(UpdatedAsana, Req:post_param(<<"from_asanas">>)),
     update_tos(UpdatedAsana, Req:post_param(<<"to_asanas">>)),
+    link_from(UpdatedAsana, Req:post_param(<<"to_asanas">>)),
+    link_to(UpdatedAsana, Req:post_param(<<"from_asanas">>)),
+    remove_inconsistant(UpdatedAsana:id()),
     update_mmgs(UpdatedAsana, Req:post_param(<<"mmgs">>)),
     update_roms(UpdatedAsana, Req:post_param(<<"roms">>)),
-
     {205, "reset content", []}.
 
 % return the associated objects of a given asana
@@ -48,6 +50,8 @@ update_asana(JSON) ->
     {ok, New} = New:save(),
     New.
 
+% Remove all enter_froms and exit_tos and then insert the ones indicated for
+% the given Asana.
 update_froms(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_enters_from(PList).
@@ -56,6 +60,33 @@ update_tos(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_exits_to(PList).
 
+% Create an enter_from for each Exit To added to the asana.
+link_from(UpdatedAsana, JSONTos) ->
+    PList = json_to_plist(JSONTos),
+    _= [add_new_enter_from(Id, UpdatedAsana:id()) || Id <- PList].
+
+% Create an exit_to for each Enter From added to the asana.
+link_to(UpdatedAsana, JSONEnters) ->
+    PList = json_to_plist(JSONEnters),
+    _= [add_new_exit_to(Id, UpdatedAsana:id()) || Id <- PList].
+
+
+% Removing an Enter or Exit from an asana should remove the removed things
+% corresponding Exit or Enter.
+remove_inconsistant(UpdatedAsanaId) ->
+    UpdatedAsana = boss_db:find(UpdatedAsanaId),
+
+    Candidates = boss_db:find(exit_to,[{to_asana_id, equals, UpdatedAsana:id()}],[]),
+    Valid = [From:from_asana_id() || From <- UpdatedAsana:enter_from()],
+    Filter = fun(Candidate) -> not lists:member(Candidate:asana_id(), Valid) end,
+    _ = [boss_db:delete(Looser:id()) || Looser <- lists:filter(Filter, Candidates)],
+
+    Candidates2 = boss_db:find(enter_from,[{from_asana_id, equals, UpdatedAsana:id()}],[]),
+    Valid2 = [To:to_asana_id() || To <- UpdatedAsana:exit_to()],
+    Filter2 = fun(Candidate) -> not lists:member(Candidate:asana_id(), Valid2) end,
+    _ = [boss_db:delete(Looser:id()) || Looser <- lists:filter(Filter2, Candidates2)].
+
+
 update_mmgs(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_mmgs(PList).
@@ -63,6 +94,33 @@ update_mmgs(UpdatedAsana, JSON) ->
 update_roms(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_roms(PList).
+
+
+
+add_new_enter_from(SourceId, FromId) ->
+    case boss_db:find(enter_from, 
+                      [{from_asana_id, equals, FromId},
+                       {asana_id, equals, SourceId}],
+                      []) of
+        [] ->
+            (enter_from:new(id, SourceId, FromId)):save();
+        _ ->
+            ok
+    end.
+
+add_new_exit_to(SourceId, ToId) ->
+    case boss_db:find(exit_to, 
+                      [{to_asana_id, equals, ToId},
+                       {asana_id, equals, SourceId}],
+                      []) of
+        [] ->
+            (exit_to:new(id, SourceId, ToId)):save();
+        _ ->
+            ok
+    end.
+
+
+
 
 
 

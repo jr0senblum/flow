@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Create!</title>
+    
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
+    
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+	  
+          <div style="float:left;">
+            <figure>
+            <img id="pic" src="/static/stickfigures/chair.jpg"></img>
+            <figcaption id="ename" class="text-left text-success">Starting</figcaption> 
+            </figure>
+          </div> 
+          
+          <select id="tos" data-placeholder="Next..." style="width:150px;" 
+                  class="select"> 
+          </select>
+          <select id="replace" data-placeholder="Replacements..." style="width:150px;" 
+                  class="select"> 
+          </select>
+          <div class="btn-group-sm">
+	    <button id="usebutton" class="btn btn-default" type="button" onclick="use(true)">
+	      <em class="glyphicon glyphicon-link" ></em> Use
+	    </button>
+	    <button id="donebutton" class="btn btn-default" type="button" onclick="use(false)">
+	      <em class="glyphicon glyphicon-stop" ></em> End
+	    </button>
+	    <button id="replaceBtn" class="btn btn-default" type="button" onclick="replace()">
+	      <em class="glyphicon glyphicon-transfer" ></em> Swap
+	    </button>
+
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div id='flowthusfar'class="col-md-12">
+            <ul  class="images">
+            </ul>
+          </div>
+        </div>
+      </div>
+  <div class="row">
+    <div class="col-md-12">
+          <div class="btn-group-sm">
+	    <button class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" class="badge"></span>
+            </button>
+	    <button class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-object-align-vertical" ></em><span id="attB" class="badge"></span>
+            </button>
+	    <button  class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF" class="badge"></span>
+            </button>
+          </div>
+    </div>
+  </div>
+
+
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+
+
+  <script>
+
+
+$(document).ready(function() {
+  loadAllAsana(0);
+  setAtt();
+  setButtonState(true);
+  })
+
+// Asanas is the array of all asanas, current is the index of the current one.
+var asanas = new Array();
+var current = 0;
+var flow = [];
+var altOrigPos;
+var nS = 0;
+var nB = 0;
+var nF = 0;
+
+// Attach the change function.
+
+$("#tos").on('change', function() {
+  var comp = this;
+  if (comp.selectedIndex) {
+    setButtonState(false)
+  } else {
+    setButtonState(true)
+  }
+})
+
+
+
+// Load all asana and set the current asana to be the index.
+function loadAllAsana(index) {
+  $.ajax("/create/asana/all",
+         { cache: false,
+           success: function(data, code, xhr) {
+             asanas = data.asanas;
+             current = index;
+             displayAsana()
+           }})
+}
+
+
+function displayAsana() {
+  $("#ename").text(asanas[current].name + " - " + asanas[current].sanskrit);
+  $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
+  getDetails();
+}
+
+// Get related objects to the current asana.
+function getDetails() {
+  $.ajax("/create/related/" + asanas[current].id,
+         { cache: false,
+           success: function(data, code, xhr) {
+             populateEntersAndExits(data.exits, $('#tos'))
+         }})}
+
+// Get related objects to the current asana.
+function replacements(Id, Id2, CurrentId) {
+  $.ajax("/create/replacements/" + Id +"/"+Id2,
+         { cache: false,
+           success: function(data, code, xhr) {
+             populateAlts(data.replacements, CurrentId)
+         }})}
+
+// Populate either entering or exiting asana select boxes.
+function populateEntersAndExits(enters, control) {
+  var Rows = "</option><optgroup label='Previously linked'>";
+  var Found = new Array();
+  
+  for (i = 0; i < enters.length; i++) {
+    Rows = Rows + 
+      '<option value="' + enters[i].id + '">'+ 
+      enters[i].name + '</option>';
+    Found.push(enters[i].id);
+  };
+  Rows = Rows + "</optgroup>"
+  control.html(Rows);
+
+  Rows = "<optgroup label='Not used'>";
+  for (i = 0; i < asanas.length; i++) {
+    if (Found.indexOf(asanas[i].id) == -1 && i != current) {
+      Rows = Rows + 
+        '<option value="' + asanas[i].id + '">' + 
+        asanas[i].name + '</option>';
+    }
+  }
+  Rows = Rows + "</optgroup>";
+  control.append(Rows);
+}
+
+function populateAlts(Items, SelectedId) {
+  var control = $("#replace");
+  var Rows = "<option value=''></option><optgroup label='Previously linked'>";
+
+  var Found = new Array();
+  
+  for (i = 0; i < Items.length; i++) {
+    var S;
+    if (Items[i].id == SelectedId) {S = " selected "} else {S = ""};
+    Rows = Rows + 
+      '<option value="' + Items[i].id + '" ' + S + '>'+ 
+      Items[i].name + '</option>';
+    Found.push(Items[i].id);
+  };
+  Rows = Rows + "</optgroup>"
+  control.html(Rows);
+
+  Rows = "<optgroup label='Not used'>";
+  for (i = 0; i < asanas.length; i++) {
+    if (Found.indexOf(asanas[i].id) == -1) {
+    var S;
+    if (asanas[i].id == SelectedId) {S = " selected "} else {S = ""};
+      Rows = Rows + 
+        '<option value="' + asanas[i].id + '" ' + S + '>' + 
+        asanas[i].name + '</option>';
+    }
+  }
+  Rows = Rows + "</optgroup>";
+  control.append(Rows);
+
+}
+
+function use(bAdd) {
+  var Options = $("#replace option");
+  if (Options.length > 0) {
+    Options[0].selected = true;
+  };
+  var comp = $("#tos")[0];
+  var newAsinaId = comp.options[comp.selectedIndex].value;
+  var name = comp.options[comp.selectedIndex].text;
+  var oldHead = asanas[current];
+  var oldHeadId = asanas[current].id;
+  setButtonState(true);
+  if (bAdd) {
+    current = indexof(newAsinaId, asanas);
+  };
+  updateAttCount(oldHead, true);
+  displayAsana();
+  getDetails();
+
+  flow.push(oldHead.id);
+  var Id = "" + flow.length;
+  var Row = '<li id="' + Id + '">' +
+            '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\''+oldHeadId+'\',\''+Id+'\' )"></li>';  
+  var List  = $("#flowthusfar ul");
+  List.append(Row);
+  var wtf    = $("#flowthusfar ul");
+  var width = wtf[0].scrollWidth;
+  List.scrollLeft(width);
+}
+
+function replace() {
+  var comp = $("#replace")[0];
+  var SelectedIndex = comp.selectedIndex;
+  if (SelectedIndex > -1) {
+    var newAsinaId = comp.options[SelectedIndex].value;
+    var name = comp.options[SelectedIndex].text;
+
+    if (newAsinaId != "") {                  
+      flow[altOrigPos] = newAsinaId;
+      recalcAtt();
+      var rowIndex = altOrigPos + 1;
+      $("#"+rowIndex+" img").attr('src','/static/stickfigures/' + name.toLowerCase() + '.jpg')
+      $("#"+rowIndex+" img").attr('onclick','backUp("'+newAsinaId+'","'+rowIndex+'")');
+    }
+  }
+}
+
+function indexof(identifier, inArray) {
+  var found = inArray.findIndex(function(el,i,a) 
+                               { if (el.id == identifier) {
+                                 return true
+                               } else { 
+                                 return false
+                               }
+                               });
+  return found
+}
+
+
+function backUp(Id, PosId) {
+  var Options = $("#replace option");
+  if (Options.length > 0) {
+    Options[0].selected = true;
+  };
+  var elem=$("#"+ PosId)[0];
+  var last=elem.parentNode.lastChild;
+  if (PosId == flow.length) {
+    var indexInFlow = flow.lastIndexOf(Id);
+    setButtonState(true);
+    flow.splice(PosId - 1, 1);
+    elem.parentNode.removeChild(last);
+    current = indexof(Id, asanas);
+    updateAttCount(asanas[current], false);
+    displayAsana();
+    getDetails()
+  } else {
+    altOrigPos=PosId-1;
+    replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
+  }
+}
+
+function recalcAtt() {
+  nS=0; nB=0; nF=0;
+  flow.forEach(function(Id, i) {
+    var Index = indexof(Id, asanas);
+    updateAttCount(asanas[Index], true)
+    })
+}
+
+function updateAttCount(Asana, bAdd) {
+  var offset;
+  if (bAdd) {
+    offset = 1
+  } else {
+    offset = -1
+  };
+
+  if (Asana.strength) {
+    nS = nS + offset
+  };
+  if (Asana.ballance) {
+    nB = nB + offset
+  };
+  if (Asana.flexibility) {
+    nF = nF + offset
+  };
+  setAtt()
+}
+
+function setAtt() {
+  $("#attS").text(nS);
+  $("#attB").text(nB);
+  $("#attF").text(nF)
+}
+
+
+
+// Button State Management
+//
+
+function setButtonState(state) {
+  // change button state
+  // state = true indicates button is off
+  $("#usebutton").prop("disabled", false)
+}
+
+</script>
+  </body>
+</html>
+
+
+

@@ -30,7 +30,7 @@ ul.images {
         white-space: nowrap;
 #        width: 667px;
         overflow-x: auto;
-        background-color: #ddd;
+#        background-color: #ddd;
       }
 ul.images li {
         display: inline;

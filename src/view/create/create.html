@@ -18,45 +18,34 @@
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-12">
-	  
-          <div style="float:left;">
-            <figure>
+        <div class="col-xs-7">
+          <div>
+            <a id="ename" class="text-left text-success">Starting</a> 
             <img id="pic" src="/static/stickfigures/chair.jpg"></img>
-            <figcaption id="ename" class="text-left text-success">Starting</figcaption> 
-            </figure>
-          </div> 
-          
-          <select id="tos" data-placeholder="Next..." style="width:150px;" 
-                  class="select"> 
-          </select>
-          <select id="replace" data-placeholder="Replacements..." style="width:150px;" 
-                  class="select"> 
-          </select>
+          </div>
+        </div>
+        <div class="col-xs-5">
+          <div>
+            <select id="tos" data-placeholder="Next..."
+                    class="select"> 
+            </select>
+            <select id="replace" data-placeholder="Replacements..."  
+                    class="select"> 
+            </select>
+          </div>
+        
+        
           <div class="btn-group-sm">
 	    <button id="usebutton" class="btn btn-default" type="button" onclick="use(true)">
-	      <em class="glyphicon glyphicon-link" ></em> Use
+	      <em class="glyphicon glyphicon-link" ></em> 
 	    </button>
 	    <button id="donebutton" class="btn btn-default" type="button" onclick="use(false)">
-	      <em class="glyphicon glyphicon-stop" ></em> End
+	      <em class="glyphicon glyphicon-stop" ></em> 
 	    </button>
 	    <button id="replaceBtn" class="btn btn-default" type="button" onclick="replace()">
-	      <em class="glyphicon glyphicon-transfer" ></em> Swap
+	      <em class="glyphicon glyphicon-transfer" ></em> 
 	    </button>
-
           </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div id='flowthusfar'class="col-md-12">
-            <ul  class="images">
-            </ul>
-          </div>
-        </div>
-      </div>
-  <div class="row">
-    <div class="col-md-12">
           <div class="btn-group-sm">
 	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" class="badge"></span>
@@ -68,8 +57,19 @@
 	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF" class="badge"></span>
             </button>
           </div>
-    </div>
-  </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div id='flowthusfar'>
+            <ul  class="images">
+            </ul>
+          </div>
+        </div>
+      </div>
+
 
 
   <script src="/static/js/jquery.min.js"></script>
@@ -120,7 +120,7 @@ function loadAllAsana(index) {
 
 
 function displayAsana() {
-  $("#ename").text(asanas[current].name + " - " + asanas[current].sanskrit);
+  $("#ename").text(asanas[current].name + " (" + asanas[current].sanskrit + ")"); 
   $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
   getDetails();
 }
@@ -200,6 +200,10 @@ function populateAlts(Items, SelectedId) {
 }
 
 function use(bAdd) {
+
+  $('img').removeClass('focused');
+
+
   var Options = $("#replace option");
   if (Options.length > 0) {
     Options[0].selected = true;
@@ -258,6 +262,10 @@ function indexof(identifier, inArray) {
 
 
 function backUp(Id, PosId) {
+
+  $('img').removeClass('focused');
+  $('#'+PosId+' img').addClass('focused');
+
   var Options = $("#replace option");
   if (Options.length > 0) {
     Options[0].selected = true;
@@ -323,6 +331,9 @@ function setButtonState(state) {
   // state = true indicates button is off
   $("#usebutton").prop("disabled", false)
 }
+
+
+
 
 </script>
   </body>

@@ -21,7 +21,7 @@
         <div class="col-xs-7">
           <div>
             <a id="ename" class="text-left text-success">Starting</a> 
-            <img id="pic" src="/static/stickfigures/chair.jpg"></img>
+            <img id="pic" src="/static/stickfigures/chair.jpg" onclick="restore()"></img>
           </div>
         </div>
         <div class="col-xs-5">
@@ -168,6 +168,9 @@ function populateEntersAndExits(enters, control) {
 }
 
 function populateAlts(Items, SelectedId) {
+  document.getElementById("tos").style.display = "none"
+  document.getElementById("replace").style.display = "block"
+
   var control = $("#replace");
   var Rows = "<option value=''></option><optgroup label='Previously linked'>";
 
@@ -247,6 +250,12 @@ function replace() {
       $("#"+rowIndex+" img").attr('onclick','backUp("'+newAsinaId+'","'+rowIndex+'")');
     }
   }
+}
+
+function restore() {
+  $('img').removeClass('focused');
+  document.getElementById("tos").style.display = "block";
+  document.getElementById("replace").style.display = "none"
 }
 
 function indexof(identifier, inArray) {

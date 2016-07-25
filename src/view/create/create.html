@@ -21,7 +21,7 @@
         <div class="col-xs-7">
           <div>
             <a id="ename" class="text-left text-success">Starting</a> 
-            <img id="pic" src="/static/stickfigures/chair.jpg" onclick="restore()"></img>
+            <img id="pic" src="" onclick="restore()"></img>
           </div>
         </div>
         <div class="col-xs-5">
@@ -42,7 +42,7 @@
 	    <button id="donebutton" class="btn btn-default" type="button" onclick="use(false)">
 	      <em class="glyphicon glyphicon-stop" ></em> 
 	    </button>
-	    <button id="replaceBtn" class="btn btn-default" type="button" onclick="replace()">
+	    <button id="swapbutton" class="btn btn-default" type="button" onclick="replace()">
 	      <em class="glyphicon glyphicon-transfer" ></em> 
 	    </button>
           </div>
@@ -82,8 +82,11 @@
 $(document).ready(function() {
   loadAllAsana(0);
   setAtt();
-  setButtonState(true);
-  })
+  setButtonDisabled($('#donebutton'), false);
+  setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#swapbutton'), true)
+})
+
 
 // Asanas is the array of all asanas, current is the index of the current one.
 var asanas = new Array();
@@ -113,8 +116,10 @@ function loadAllAsana(index) {
          { cache: false,
            success: function(data, code, xhr) {
              asanas = data.asanas;
-             current = index;
-             displayAsana()
+//             current = index;
+             current = -1;
+             populateEntersAndExits(data.asanas, $("#tos"));
+//             displayAsana()
            }})
 }
 
@@ -203,36 +208,39 @@ function populateAlts(Items, SelectedId) {
 }
 
 function use(bAdd) {
-
+  // If any image had been hightlighted, remove it.
   $('img').removeClass('focused');
 
+  var old_current = current;
 
-  var Options = $("#replace option");
-  if (Options.length > 0) {
-    Options[0].selected = true;
-  };
+
   var comp = $("#tos")[0];
-  var newAsinaId = comp.options[comp.selectedIndex].value;
+  var new_asana_id = comp.options[comp.selectedIndex].value;
   var name = comp.options[comp.selectedIndex].text;
-  var oldHead = asanas[current];
-  var oldHeadId = asanas[current].id;
-  setButtonState(true);
+
   if (bAdd) {
-    current = indexof(newAsinaId, asanas);
+    current = indexof(new_asana_id, asanas);
   };
-  updateAttCount(oldHead, true);
+
   displayAsana();
   getDetails();
 
-  flow.push(oldHead.id);
-  var Id = "" + flow.length;
-  var Row = '<li id="' + Id + '">' +
-            '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\''+oldHeadId+'\',\''+Id+'\' )"></li>';  
-  var List  = $("#flowthusfar ul");
-  List.append(Row);
+  if (old_current > -1) {
+    var oldHead = asanas[old_current];
+    var oldHeadId = asanas[old_current].id;
+    updateAttCount(oldHead, true);
+    
+    flow.push(oldHead.id);
+    var Id = "" + flow.length;
+    var Row = '<li id="' + Id + '">' +
+      '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\''+oldHeadId+'\',\''+Id+'\' )"></li>';  
+    var List  = $("#flowthusfar ul");
+    List.append(Row);
+  };
+
   var wtf    = $("#flowthusfar ul");
   var width = wtf[0].scrollWidth;
-  List.scrollLeft(width);
+  if (List) List.scrollLeft(width);
 }
 
 function replace() {
@@ -254,6 +262,9 @@ function replace() {
 
 function restore() {
   $('img').removeClass('focused');
+  setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#donebutton'), false);
+  setButtonDisabled($('#swapbutton'), true)
   document.getElementById("tos").style.display = "block";
   document.getElementById("replace").style.display = "none"
 }
@@ -271,7 +282,6 @@ function indexof(identifier, inArray) {
 
 
 function backUp(Id, PosId) {
-
   $('img').removeClass('focused');
   $('#'+PosId+' img').addClass('focused');
 
@@ -282,6 +292,10 @@ function backUp(Id, PosId) {
   var elem=$("#"+ PosId)[0];
   var last=elem.parentNode.lastChild;
   if (PosId == flow.length) {
+    setButtonDisabled($('#usebutton'), false);
+    setButtonDisabled($('#donebutton'), false);
+    setButtonDisabled($('#swapbutton'), true)
+
     var indexInFlow = flow.lastIndexOf(Id);
     setButtonState(true);
     flow.splice(PosId - 1, 1);
@@ -291,6 +305,9 @@ function backUp(Id, PosId) {
     displayAsana();
     getDetails()
   } else {
+    setButtonDisabled($('#usebutton'), true);
+    setButtonDisabled($('#donebutton'), true);
+    setButtonDisabled($('#swapbutton'), false)
     altOrigPos=PosId-1;
     replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
   }
@@ -339,6 +356,15 @@ function setButtonState(state) {
   // change button state
   // state = true indicates button is off
   $("#usebutton").prop("disabled", false)
+}
+
+// Button State Management
+//
+
+function setButtonDisabled(button, state) {
+  // change icon and text from save to saved and back again.
+  // state = true indicates that everything has been saved.
+  button.prop("disabled", state);
 }
 
 

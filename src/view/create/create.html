@@ -36,10 +36,13 @@
         
         
           <div class="btn-group-sm">
-	    <button id="usebutton" class="btn btn-default" type="button" onclick="use(true)">
+	    <button id="usebutton" class="btn btn-default" type="button" onclick="use()">
 	      <em class="glyphicon glyphicon-link" ></em> 
 	    </button>
-	    <button id="donebutton" class="btn btn-default" type="button" onclick="use(false)">
+	     <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
+	       <em  class="glyphicon glyphicon-refresh" ></em> Undo
+	     </button>
+	    <button id="donebutton" class="btn btn-default" type="button" onclick="stop()">
 	      <em class="glyphicon glyphicon-stop" ></em> 
 	    </button>
 	    <button id="swapbutton" class="btn btn-default" type="button" onclick="replace()">
@@ -82,8 +85,9 @@
 $(document).ready(function() {
   loadAllAsana(0);
   setAtt();
-  setButtonDisabled($('#donebutton'), false);
+  setButtonDisabled($('#donebutton'), true);
   setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#undobutton'), true)
   setButtonDisabled($('#swapbutton'), true)
 })
 
@@ -92,6 +96,7 @@ $(document).ready(function() {
 var asanas = new Array();
 var current = 0;
 var flow = [];
+var done = false;
 var altOrigPos;
 var nS = 0;
 var nB = 0;
@@ -207,40 +212,59 @@ function populateAlts(Items, SelectedId) {
 
 }
 
-function use(bAdd) {
-  // If any image had been hightlighted, remove it.
+function scrollToEnd() {
+  var flow_list  = $("#flowthusfar ul");
+  var width = flow_list[0].scrollWidth;
+  if (flow_list) flow_list.scrollLeft(width)
+}
+
+function stop() {
+  done = true;
+  var oldHead = asanas[current];
+  var oldHeadId = asanas[current].id;
+  var Id = (flow.length).toString();
+  var Row = '<li id="' + Id + '">' +
+      '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg"> </li>';  
+  var List  = $("#flowthusfar ul");
+  List.append(Row);
+  scrollToEnd();
+
+  setButtonDisabled($('#usebutton'), true);
+  setButtonDisabled($('#donebutton'), true);
+  setButtonDisabled($('#swapbutton'), true);
+  setButtonDisabled($('#undobutton'), false);
+}
+
+function use() {
+  // If any image had been hightlighted, remove that highlight.
   $('img').removeClass('focused');
-
-  var old_current = current;
-
 
   var comp = $("#tos")[0];
   var new_asana_id = comp.options[comp.selectedIndex].value;
   var name = comp.options[comp.selectedIndex].text;
 
-  if (bAdd) {
-    current = indexof(new_asana_id, asanas);
-  };
+  var old_current = current;
+  current = indexof(new_asana_id, asanas);
 
+  updateAttCount(asanas[current],true);
   displayAsana();
-  getDetails();
+
+  flow.push(new_asana_id);
 
   if (old_current > -1) {
     var oldHead = asanas[old_current];
     var oldHeadId = asanas[old_current].id;
-    updateAttCount(oldHead, true);
-    
-    flow.push(oldHead.id);
-    var Id = "" + flow.length;
+    var Id = (flow.length - 1).toString();
     var Row = '<li id="' + Id + '">' +
-      '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\''+oldHeadId+'\',\''+Id+'\' )"></li>';  
+      '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\'' + Id + '\' )"></li>';  
     var List  = $("#flowthusfar ul");
     List.append(Row);
   };
-
-  var wtf    = $("#flowthusfar ul");
-  var width = wtf[0].scrollWidth;
-  if (List) List.scrollLeft(width);
+  setButtonDisabled($('#donebutton'), false);
+  setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#undobutton'), flow.length < 2);
+  setButtonDisabled($('#swapbutton'), true)
+  scrollToEnd();
 }
 
 function replace() {
@@ -255,7 +279,7 @@ function replace() {
       recalcAtt();
       var rowIndex = altOrigPos + 1;
       $("#"+rowIndex+" img").attr('src','/static/stickfigures/' + name.toLowerCase() + '.jpg')
-      $("#"+rowIndex+" img").attr('onclick','backUp("'+newAsinaId+'","'+rowIndex+'")');
+      $("#"+rowIndex+" img").attr('onclick','backUp("'+rowIndex+'")');
     }
   }
 }
@@ -265,6 +289,7 @@ function restore() {
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#donebutton'), false);
   setButtonDisabled($('#swapbutton'), true)
+  setButtonDisabled($('#undobutton'), flow.length < 2);
   document.getElementById("tos").style.display = "block";
   document.getElementById("replace").style.display = "none"
 }
@@ -281,36 +306,35 @@ function indexof(identifier, inArray) {
 }
 
 
-function backUp(Id, PosId) {
-  $('img').removeClass('focused');
-  $('#'+PosId+' img').addClass('focused');
-
-  var Options = $("#replace option");
-  if (Options.length > 0) {
-    Options[0].selected = true;
-  };
-  var elem=$("#"+ PosId)[0];
-  var last=elem.parentNode.lastChild;
-  if (PosId == flow.length) {
-    setButtonDisabled($('#usebutton'), false);
-    setButtonDisabled($('#donebutton'), false);
-    setButtonDisabled($('#swapbutton'), true)
-
-    var indexInFlow = flow.lastIndexOf(Id);
-    setButtonState(true);
-    flow.splice(PosId - 1, 1);
-    elem.parentNode.removeChild(last);
-    current = indexof(Id, asanas);
-    updateAttCount(asanas[current], false);
-    displayAsana();
-    getDetails()
+function undo() {
+  var last_in_flow;
+  if(done) {
+    last_in_flow = flow[flow.length-1];
+    done = false;
   } else {
-    setButtonDisabled($('#usebutton'), true);
-    setButtonDisabled($('#donebutton'), true);
-    setButtonDisabled($('#swapbutton'), false)
-    altOrigPos=PosId-1;
-    replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
-  }
+    last_in_flow = flow.pop();
+    updateAttCount(asanas[indexof(last_in_flow, asanas)]);
+  current = indexof(flow[flow.length-1], asanas)
+  };
+  
+  $("#flowthusfar ul li:last").remove();
+  setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#donebutton'), false);
+  setButtonDisabled($('#swapbutton'), true);
+  setButtonDisabled($('#undobutton'), flow.length < 2);
+  displayAsana()
+}
+
+function backUp(PosId) {
+  $('img').removeClass('focused');
+  $('#' + PosId + ' img').addClass('focused');
+
+  setButtonDisabled($('#usebutton'), true);
+  setButtonDisabled($('#donebutton'), true);
+  setButtonDisabled($('#swapbutton'), false)
+  setButtonDisabled($('#undobutton'), true);
+  altOrigPos=PosId-1;
+  replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
 }
 
 function recalcAtt() {

@@ -45,7 +45,7 @@
 	    <button id="donebutton" class="btn btn-default" type="button" onclick="stop()">
 	      <em class="glyphicon glyphicon-stop" ></em> 
 	    </button>
-	    <button id="swapbutton" class="btn btn-default" type="button" onclick="replace()">
+	    <button id="swapbutton" class="btn btn-default" type="button" onclick="swap()">
 	      <em class="glyphicon glyphicon-transfer" ></em> 
 	    </button>
           </div>
@@ -95,6 +95,8 @@ $(document).ready(function() {
 // Asanas is the array of all asanas, current is the index of the current one.
 var asanas = new Array();
 var current = 0;
+
+// Flow is the lists of Asana IDs defining the flow being construted.
 var flow = [];
 var done = false;
 var altOrigPos;
@@ -102,65 +104,43 @@ var nS = 0;
 var nB = 0;
 var nF = 0;
 
-// Attach the change function.
 
-$("#tos").on('change', function() {
-  var comp = this;
-  if (comp.selectedIndex) {
-    setButtonState(false)
-  } else {
-    setButtonState(true)
-  }
-})
-
-
-
-// Load all asana and set the current asana to be the index.
+// Load all asana and set innitial current state.
 function loadAllAsana(index) {
   $.ajax("/create/asana/all",
          { cache: false,
            success: function(data, code, xhr) {
              asanas = data.asanas;
-//             current = index;
              current = -1;
-             populateEntersAndExits(data.asanas, $("#tos"));
-//             displayAsana()
+             populateChoices(data.asanas, $("#tos"));
            }})
 }
 
-
+// Display the image of the current asana and its name.
 function displayAsana() {
   $("#ename").text(asanas[current].name + " (" + asanas[current].sanskrit + ")"); 
   $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
-  getDetails();
+  getRelatedAsana();
 }
 
-// Get related objects to the current asana.
-function getDetails() {
+// Get Asana previously selected ater the current one.
+function getRelatedAsana() {
   $.ajax("/create/related/" + asanas[current].id,
          { cache: false,
            success: function(data, code, xhr) {
-             populateEntersAndExits(data.exits, $('#tos'))
+             populateChoices(data.exits, $('#tos'))
          }})}
 
-// Get related objects to the current asana.
-function replacements(Id, Id2, CurrentId) {
-  $.ajax("/create/replacements/" + Id +"/"+Id2,
-         { cache: false,
-           success: function(data, code, xhr) {
-             populateAlts(data.replacements, CurrentId)
-         }})}
-
-// Populate either entering or exiting asana select boxes.
-function populateEntersAndExits(enters, control) {
+// Populate exiting or alternative asanas.
+function populateChoices(choices, control) {
   var Rows = "</option><optgroup label='Previously linked'>";
   var Found = new Array();
   
-  for (i = 0; i < enters.length; i++) {
+  for (i = 0; i < choices.length; i++) {
     Rows = Rows + 
-      '<option value="' + enters[i].id + '">'+ 
-      enters[i].name + '</option>';
-    Found.push(enters[i].id);
+      '<option value="' + choices[i].id + '">'+ 
+      choices[i].name + '</option>';
+    Found.push(choices[i].id);
   };
   Rows = Rows + "</optgroup>"
   control.html(Rows);
@@ -177,46 +157,13 @@ function populateEntersAndExits(enters, control) {
   control.append(Rows);
 }
 
-function populateAlts(Items, SelectedId) {
-  document.getElementById("tos").style.display = "none"
-  document.getElementById("replace").style.display = "block"
-
-  var control = $("#replace");
-  var Rows = "<option value=''></option><optgroup label='Previously linked'>";
-
-  var Found = new Array();
-  
-  for (i = 0; i < Items.length; i++) {
-    var S;
-    if (Items[i].id == SelectedId) {S = " selected "} else {S = ""};
-    Rows = Rows + 
-      '<option value="' + Items[i].id + '" ' + S + '>'+ 
-      Items[i].name + '</option>';
-    Found.push(Items[i].id);
-  };
-  Rows = Rows + "</optgroup>"
-  control.html(Rows);
-
-  Rows = "<optgroup label='Not used'>";
-  for (i = 0; i < asanas.length; i++) {
-    if (Found.indexOf(asanas[i].id) == -1) {
-    var S;
-    if (asanas[i].id == SelectedId) {S = " selected "} else {S = ""};
-      Rows = Rows + 
-        '<option value="' + asanas[i].id + '" ' + S + '>' + 
-        asanas[i].name + '</option>';
-    }
-  }
-  Rows = Rows + "</optgroup>";
-  control.append(Rows);
-
-}
-
+// make sure that the the horizonaal list of flow_thus_far shows the last asana.
 function scrollToEnd() {
   var flow_list  = $("#flowthusfar ul");
   var width = flow_list[0].scrollWidth;
   if (flow_list) flow_list.scrollLeft(width)
 }
+
 
 function stop() {
   done = true;
@@ -267,7 +214,9 @@ function use() {
   scrollToEnd();
 }
 
-function replace() {
+
+// the swap button was pressed, if a replacement has been selected... swap it.
+function swap() {
   var comp = $("#replace")[0];
   var SelectedIndex = comp.selectedIndex;
   if (SelectedIndex > -1) {
@@ -275,8 +224,11 @@ function replace() {
     var name = comp.options[SelectedIndex].text;
 
     if (newAsinaId != "") {                  
+      // blank wasn't selected, replace the original in flow with the new
       flow[altOrigPos] = newAsinaId;
       recalcAtt();
+
+      // update teh image and onclick attributes in the list of flow asanas
       var rowIndex = altOrigPos + 1;
       $("#"+rowIndex+" img").attr('src','/static/stickfigures/' + name.toLowerCase() + '.jpg')
       $("#"+rowIndex+" img").attr('onclick','backUp("'+rowIndex+'")');
@@ -284,12 +236,17 @@ function replace() {
   }
 }
 
+// Clicking the staged asana resets all the button states - we are now in add asana mode.
 function restore() {
   $('img').removeClass('focused');
-  setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#donebutton'), false);
+
+  // no swap, yes use, done if not already done, undo if we have a flow
   setButtonDisabled($('#swapbutton'), true)
+  setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#donebutton'), done);
   setButtonDisabled($('#undobutton'), flow.length < 2);
+
+  // Display asana list related
   document.getElementById("tos").style.display = "block";
   document.getElementById("replace").style.display = "none"
 }
@@ -325,17 +282,71 @@ function undo() {
   displayAsana()
 }
 
+// User selected a non-last asana, select it and load potential replacements.
 function backUp(PosId) {
   $('img').removeClass('focused');
   $('#' + PosId + ' img').addClass('focused');
 
+  // record the position of the asana targted for replacement.
+  altOrigPos=PosId-1;
+
+  // only the sawp buttonis allowed
   setButtonDisabled($('#usebutton'), true);
   setButtonDisabled($('#donebutton'), true);
-  setButtonDisabled($('#swapbutton'), false)
   setButtonDisabled($('#undobutton'), true);
-  altOrigPos=PosId-1;
+  setButtonDisabled($('#swapbutton'), false)
+
+  // Flow member to the left, to the right and the one being targeted (middle).
   replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
 }
+
+function replacements(Id, Id2, CurrentId) {
+  $.ajax("/create/replacements/" + Id +"/"+Id2,
+         { cache: false,
+           success: function(data, code, xhr) {
+             populateAlts(data.replacements, CurrentId)
+         }})}
+
+
+// populate the select component with potential replacements
+// add all other asanas
+function populateAlts(Items, SelectedId) {
+  document.getElementById("tos").style.display = "none"
+  document.getElementById("replace").style.display = "block"
+
+  var control = $("#replace");
+  var Rows = "<option value=''></option><optgroup label='Previously linked'>";
+
+  var Found = new Array();
+  
+  for (i = 0; i < Items.length; i++) {
+    var S;
+    if (Items[i].id == SelectedId) {S = " selected "} else {S = ""};
+    Rows = Rows + 
+      '<option value="' + Items[i].id + '" ' + S + '>'+ 
+      Items[i].name + '</option>';
+    Found.push(Items[i].id);
+  };
+  Rows = Rows + "</optgroup>"
+  control.html(Rows);
+
+  Rows = "<optgroup label='Not used'>";
+  for (i = 0; i < asanas.length; i++) {
+    if (Found.indexOf(asanas[i].id) == -1) {
+    var S;
+    if (asanas[i].id == SelectedId) {S = " selected "} else {S = ""};
+      Rows = Rows + 
+        '<option value="' + asanas[i].id + '" ' + S + '>' + 
+        asanas[i].name + '</option>';
+    }
+  }
+  Rows = Rows + "</optgroup>";
+  control.append(Rows);
+
+}
+
+
+
 
 function recalcAtt() {
   nS=0; nB=0; nF=0;

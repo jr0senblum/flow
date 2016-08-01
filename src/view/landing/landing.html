@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Create!</title>
+    
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
+    
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+	<div class="col-md-12">
+          <table class="table table-condensed table-striped">
+	    <thead>
+	      <tr>
+		<th>#</th>
+		<th>Name</th>
+		<th>Description</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    {% if flows %} 
+	    {% for f in flows%}
+	      <tr class="active"  onclick="showfield('{{f.id}}', '{{f.name}}')">
+		<td>{{f.id}}</td>
+		<td>{{f.name}}</td>
+		<td>{{f.description}}</td>
+	      </tr>
+              {% endfor %}
+              {% endif %}
+	    </tbody>
+	  </table>
+        <div id="div1"></div>
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+	  <div class="btn-group">
+	    <button id="editbutton" class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-edit"></em> Edit
+	    </button> 
+	    <button class="btn btn-default" type="button" onclick="location.href='/create/create'")>
+	      <em class="glyphicon glyphicon-plus_sign"></em> New
+	    </button> 
+	    <button class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-align-print"></em> Print
+	    </button> 
+	  </div>
+	</div>
+      </div>
+    </div>
+  </body>
+</html>
+
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function showfield(id, name){
+
+  $("#div1").html('<input type="text" readonly value="' + name + '"/>')
+  $("#editbutton").attr('onclick', "location.href='/create/create/" + id + "'")
+}
+
+</script>

@@ -6,7 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>Create!</title>
+    
+    <title>Create</title>
+    
     
     <meta name="description" content="Source code generated using layoutit.com">
     <meta name="author" content="LayoutIt!">
@@ -20,6 +22,7 @@
       <div class="row">
         <div class="col-xs-7">
           <div>
+            {% if name %} Working on {{name}} <br> {% endif %}
             <a id="ename" class="text-left text-success">Starting</a> 
             <img id="pic" src="" onclick="restore()"></img>
           </div>
@@ -85,8 +88,11 @@ $(document).ready(function() {
   setAtt();
   setButtonDisabled($('#donebutton'), true);
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#undobutton'), true)
-  setButtonDisabled($('#swapbutton'), true)
+  setButtonDisabled($('#undobutton'), true);
+  setButtonDisabled($('#swapbutton'), true);
+  // Display asana list related
+  document.getElementById("tos").style.display = "block";
+  document.getElementById("replace").style.display = "none"
 })
 
 
@@ -112,7 +118,9 @@ function loadAllAsana(index) {
              asanas = data.asanas;
              current = -1;
              populateChoices(data.asanas, $("#tos"));
-           }})
+             load_flow() 
+           }});
+
 }
 
 // Display the image of the current asana and its name.
@@ -180,6 +188,39 @@ function stop() {
   setButtonDisabled($('#swapbutton'), true);
   setButtonDisabled($('#undobutton'), false);
 }
+
+
+function load_flow() {
+  {% if flow %}
+   {% for f in flow %}
+    load_asana_from_flow('{{f}}');
+   {% endfor %}
+  setButtonDisabled($('#donebutton'), false);
+  setButtonDisabled($('#usebutton'), false);
+  setButtonDisabled($('#undobutton'), flow.length < 2);
+  setButtonDisabled($('#swapbutton'), true)
+  scrollToEnd();
+  {% endif %}
+}
+
+function load_asana_from_flow(asana_id) {
+  var old_current = current;
+  current = indexof(asana_id, asanas);
+  updateAttCount(asanas[current], true);
+  displayAsana();
+  flow.push(asana_id);
+  if (old_current > -1) {
+    var oldHead = asanas[old_current];
+    var oldHeadId = asanas[old_current].id;
+    var Id = (flow.length - 1).toString();
+    var Row = '<li id="' + Id + '">' +
+        '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\'' + Id + '\' )"></li>';  
+    var List  = $("#flowthusfar ul");
+    List.append(Row)
+  }
+}
+                    
+
 
 function use() {
   // If any image had been hightlighted, remove that highlight.

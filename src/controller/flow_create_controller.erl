@@ -2,6 +2,16 @@
 -compile(export_all).
 
 
+create('GET', []) ->
+    {ok, []};
+create('GET', [FlowId]) ->
+    [Flow] = boss_db:find(flow, [id, equals, FlowId]),
+    Asanas = string:tokens(Flow:asanas(), ","),
+    {ok, [{flow, Asanas},
+          {id, FlowId},
+          {name, Flow:name()}]}.
+
+
 % for view/admin/asana.html: return all asanas, update an asana.
 asana('GET', []) ->
     {ok, []};

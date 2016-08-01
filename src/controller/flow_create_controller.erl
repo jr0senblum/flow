@@ -6,7 +6,7 @@ create('GET', []) ->
     {ok, []};
 create('GET', [FlowId]) ->
     [Flow] = boss_db:find(flow, [id, equals, FlowId]),
-    Asanas = string:tokens(Flow:asanas(), ","),
+    Asanas = [string:strip(A) || A <- string:tokens(Flow:asanas(), ",")],
     {ok, [{flow, Asanas},
           {id, FlowId},
           {name, Flow:name()}]}.

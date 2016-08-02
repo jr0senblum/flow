@@ -20,37 +20,30 @@
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xs-7">
-         {% if name %} <div><a class="text-left">{{name}}</a></div> {% endif %}
+        <div class="col-xs-7"> 
           <div>
-            <a id="ename" class="text-left text-success">Starting</a> 
+            {% if name %} <a class="text-left">{{name}}</a> {% endif %}
+            <a id="ename" class="text-left text-success">Starting</a>  
+          </div>
+          <div>
             <img id="pic" src="" onclick="restore()"></img>
           </div>
         </div>
         <div class="col-xs-5">
-          <div>
-            <select id="tos" data-placeholder="Next..."
-                    class="select"> 
-            </select>
-            <select id="replace" data-placeholder="Replacements..."  
-                    class="select"> 
-            </select>
-          </div>
-        
-        
           <div class="btn-group-sm">
 	    <button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()">
 	      <em class="glyphicon glyphicon-link" ></em> 
 	    </button>
 	     <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
-	       <em  class="glyphicon glyphicon-refresh" ></em>
+	       <em  class="glyphicon glyphicon-step-backward" ></em>
 	     </button>
 	    <button  class="btn btn-default" type="button" onclick="save()">
-	      <em class="glyphicon glyphicon-save"></em>Save
+	      <em class="glyphicon glyphicon-save"></em>
             </button>
-	    <button  class="btn btn-default" type="button" onclick="save()">
-	      <em class="glyphicon glyphicon-save"></em>As
+	    <button  class="btn btn-default" type="button" onclick="location.href='/'">
+	      <em class="glyphicon glyphicon-arrow-left"></em>
             </button>
+
           </div>
           <div class="btn-group-sm">
 	    <button class="btn btn-default" type="button">
@@ -63,6 +56,13 @@
 	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF" class="badge"></span>
             </button>
           </div>
+
+          <div>
+            <select id="tos" data-placeholder="Next..."
+                    class="select"> 
+            </select>
+          </div>
+
         </div>
       </div>
 
@@ -88,19 +88,14 @@ $(document).ready(function() {
   setAtt();
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
-  // Display asana list not replacement list
-  document.getElementById("tos").style.display = "block";
-  document.getElementById("replace").style.display = "none"
 })
 
 
-// Asanas is the array of all asanas, current is the index of the current one.
-var asanas = new Array();
-var current = 0;
 
-// Flow is the lists of Asana IDs defining the flow being construted.
-var flow = [];
-var G_swap=false;
+var asanas = new Array(); // array of all asanas
+var current = 0;          // indext into asanas of current asana
+var flow = [];           // Array of asana-ids of the flow being constructed
+var G_swap = false;      // In swap mode?
 var altOrigPos;
 var nS = 0;
 var nB = 0;
@@ -114,7 +109,7 @@ function save() {
 }
 
 
-// Load all asana and set innitial current state.
+// Load all asanas, load flow being edited (if one), set initial current state.
 function loadAllAsana(index) {
   $.ajax("/create/asana/all",
          { cache: false,
@@ -134,7 +129,7 @@ function displayAsana() {
   getRelatedAsana();
 }
 
-// Get Asana previously selected ater the current one.
+// Fetch Asana previously selected after the current one.
 function getRelatedAsana() {
   $.ajax("/create/related/" + asanas[current].id,
          { cache: false,
@@ -246,7 +241,7 @@ function use() {
 
 // the swap button was pressed, if a replacement has been selected... swap it.
 function swap() {
-  var comp = $("#replace")[0];
+  var comp = $("#tos")[0];
   var SelectedIndex = comp.selectedIndex;
   if (SelectedIndex > -1) {
     var newAsinaId = comp.options[SelectedIndex].value;
@@ -267,15 +262,13 @@ function swap() {
 
 // Clicking the staged asana resets all the button states - we are now in add asana mode.
 function restore() {
+  getRelatedAsana();
   $('img').removeClass('focused');
 
   // no swap, yes use, undo if we have a flow
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
 
-  // Display asana list related
-  document.getElementById("tos").style.display = "block";
-  document.getElementById("replace").style.display = "none";
   scrollToEnd();
   G_swap = false
 }
@@ -295,7 +288,7 @@ function indexof(identifier, inArray) {
 function undo() {
   var last_in_flow;
   last_in_flow = flow.pop();
-  updateAttCount(asanas[indexof(last_in_flow, asanas)]);
+  updateAttCount(asanas[indexof(last_in_flow, asanas)], false);
   current = indexof(flow[flow.length-1], asanas);
   
   $("#flowthusfar ul li:last").remove();
@@ -333,10 +326,7 @@ function replacements(Id, Id2, CurrentId) {
 // populate the select component with potential replacements
 // add all other asanas
 function populateAlts(Items, SelectedId) {
-  document.getElementById("tos").style.display = "none"
-  document.getElementById("replace").style.display = "block"
-
-  var control = $("#replace");
+  var control = $("#tos");
   var Rows = "<option value=''></option><optgroup label='Previously linked'>";
 
   var Found = new Array();
@@ -366,8 +356,6 @@ function populateAlts(Items, SelectedId) {
   control.append(Rows);
 
 }
-
-
 
 
 function recalcAtt() {

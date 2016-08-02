@@ -28,7 +28,7 @@
 	    <tbody>
 	    {% if flows %} 
 	    {% for f in flows%}
-	      <tr class="active"  onclick="showfield('{{f.id}}', '{{f.name}}')">
+	      <tr class="active"  onclick="showfield('{{f.id}}', '{{f.name}}', '{{f.description}}')">
 		<td>{{f.id}}</td>
 		<td>{{f.name}}</td>
 		<td>{{f.description}}</td>
@@ -37,23 +37,42 @@
               {% endif %}
 	    </tbody>
 	  </table>
-        <div id="div1"></div>
         </div>
 
       </div>
       <div class="row">
         <div class="col-md-12">
 	  <div class="btn-group">
+	    <button id="gobutton" class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-exclamation-sign"></em> Go
+	    </button>
 	    <button id="editbutton" class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-edit"></em> Edit
 	    </button> 
-	    <button class="btn btn-default" type="button" onclick="location.href='/create/create'")>
-	      <em class="glyphicon glyphicon-plus_sign"></em> New
+	    <button class="btn btn-default" type="button" onclick="newfield()")>
+	      <em class="glyphicon glyphicon-plus-sign"></em> New
 	    </button> 
 	    <button class="btn btn-default" type="button">
-	      <em class="glyphicon glyphicon-align-print"></em> Print
+	      <em class="glyphicon glyphicon-print"></em> Print
 	    </button> 
+            <div id="div1"></div>
 	  </div>
+          <div class="form-group">
+            <form action="landing/edit" display="none" method="post" onsubmit="setTimeout(function () { window.location.reload(); }, 10)">
+              <input type="hidden" id="id" name="id" class="form-control">
+              <label for="name">Name</label>
+              <input type="text" id = "name" name="name" class="form-control">
+              <label for="desc">Description</label>
+              <input type="text" id="desc" name="description" class="form-control">
+              <button type="submit" class="btn btn-default">
+		Submit
+	      </button>
+              <button type="button" class="btn btn-default" onclick="hideForm()">
+		Cancel
+	      </button>
+
+            </form>
+          </div>
 	</div>
       </div>
     </div>
@@ -65,10 +84,39 @@
 <script src="/static/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 
-function showfield(id, name){
+function hideForm() {
+  $("form").hide();
+  $("#div1").show();
+};
 
+
+$("form").hide();
+
+function showfield(id, name, desc) {
   $("#div1").html('<input type="text" readonly value="' + name + '"/>')
-  $("#editbutton").attr('onclick', "location.href='/create/create/" + id + "'")
+  $("#id").val(id);
+  $("#name").val(name);
+  $("#desc").val(desc);
+  $("#gobutton").attr('onclick', "location.href='/create/create/" + id + "'");
+  $("#editbutton").attr('onclick', "editfield('" + id + "','" + name + "','"+desc+"')")
 }
+
+
+function editfield(id, name, desc) {
+  $("#div1").hide();
+  $("form").show(); 
+  $("#name").val(name);
+  $("#desc").val(desc);
+}
+
+
+function newfield() {
+  $("#div1").hide();
+  $("form").show();
+  $("#id").val("new"); 
+  $("#name").val("");
+  $("#desc").val("");
+}
+
 
 </script>

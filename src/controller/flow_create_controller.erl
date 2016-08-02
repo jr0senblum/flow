@@ -11,6 +11,16 @@ create('GET', [FlowId]) ->
           {id, FlowId},
           {name, Flow:name()}]}.
 
+save('POST', [FlowId]) ->
+    JsonAsanas = Req:post_param(<<"updated_flow">>),
+    StructAsanas = mochijson2:decode(JsonAsanas),
+
+    Asanas = lists:foldl(fun(A, Acc) -> Acc ++ "," ++ binary_to_list(A) end, binary_to_list(hd(StructAsanas)), tl(StructAsanas)),
+    io:format("it is ~p and ~p~n",[FlowId, Asanas]),
+    F = boss_db:find(FlowId),
+    G = F:set(asanas, Asanas),
+    G:save(),
+    {205, "reset content", []}.
 
 % for view/admin/asana.html: return all asanas, update an asana.
 asana('GET', []) ->

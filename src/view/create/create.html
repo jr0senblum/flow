@@ -21,8 +21,8 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-7">
+         {% if name %} <div><a class="text-left">{{name}}</a></div> {% endif %}
           <div>
-            {% if name %} Working on {{name}} <br> {% endif %}
             <a id="ename" class="text-left text-success">Starting</a> 
             <img id="pic" src="" onclick="restore()"></img>
           </div>
@@ -39,18 +39,18 @@
         
         
           <div class="btn-group-sm">
-	    <button id="usebutton" class="btn btn-default" type="button" onclick="use()">
+	    <button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()">
 	      <em class="glyphicon glyphicon-link" ></em> 
 	    </button>
 	     <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
-	       <em  class="glyphicon glyphicon-refresh" ></em> Undo
+	       <em  class="glyphicon glyphicon-refresh" ></em>
 	     </button>
-	    <button id="donebutton" class="btn btn-default" type="button" onclick="stop()">
-	      <em class="glyphicon glyphicon-stop" ></em> 
-	    </button>
-	    <button id="swapbutton" class="btn btn-default" type="button" onclick="swap()">
-	      <em class="glyphicon glyphicon-transfer" ></em> 
-	    </button>
+	    <button  class="btn btn-default" type="button" onclick="save()">
+	      <em class="glyphicon glyphicon-save"></em>Save
+            </button>
+	    <button  class="btn btn-default" type="button" onclick="save()">
+	      <em class="glyphicon glyphicon-save"></em>As
+            </button>
           </div>
           <div class="btn-group-sm">
 	    <button class="btn btn-default" type="button">
@@ -86,11 +86,9 @@
 $(document).ready(function() {
   loadAllAsana(0);
   setAtt();
-  setButtonDisabled($('#donebutton'), true);
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
-  setButtonDisabled($('#swapbutton'), true);
-  // Display asana list related
+  // Display asana list not replacement list
   document.getElementById("tos").style.display = "block";
   document.getElementById("replace").style.display = "none"
 })
@@ -102,12 +100,18 @@ var current = 0;
 
 // Flow is the lists of Asana IDs defining the flow being construted.
 var flow = [];
-var done = false;
+var G_swap=false;
 var altOrigPos;
 var nS = 0;
 var nB = 0;
 var nF = 0;
 
+
+function save() {
+  $.post("/create/save/{{id}}",
+         {updated_flow:JSON.stringify(flow)},
+         function(data,status) { });
+}
 
 
 // Load all asana and set innitial current state.
@@ -172,33 +176,14 @@ function scrollToEnd() {
 }
 
 
-function stop() {
-  done = true;
-  var oldHead = asanas[current];
-  var oldHeadId = asanas[current].id;
-  var Id = (flow.length).toString();
-  var Row = '<li id="' + Id + '">' +
-      '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg"> </li>';  
-  var List  = $("#flowthusfar ul");
-  List.append(Row);
-  scrollToEnd();
-
-  setButtonDisabled($('#usebutton'), true);
-  setButtonDisabled($('#donebutton'), true);
-  setButtonDisabled($('#swapbutton'), true);
-  setButtonDisabled($('#undobutton'), false);
-}
-
-
+// If this page is loaded with pre-exiting flow information, use it.
 function load_flow() {
   {% if flow %}
    {% for f in flow %}
     load_asana_from_flow('{{f}}');
    {% endfor %}
-  setButtonDisabled($('#donebutton'), false);
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
-  setButtonDisabled($('#swapbutton'), true)
   scrollToEnd();
   {% endif %}
 }
@@ -219,8 +204,14 @@ function load_asana_from_flow(asana_id) {
     List.append(Row)
   }
 }
-                    
-
+         
+function selectAsana() {           
+  if (G_swap) { 
+    swap() 
+  } else { 
+    use() 
+  }
+}
 
 function use() {
   // If any image had been hightlighted, remove that highlight.
@@ -247,10 +238,8 @@ function use() {
     var List  = $("#flowthusfar ul");
     List.append(Row);
   };
-  setButtonDisabled($('#donebutton'), false);
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
-  setButtonDisabled($('#swapbutton'), true)
   scrollToEnd();
 }
 
@@ -280,15 +269,15 @@ function swap() {
 function restore() {
   $('img').removeClass('focused');
 
-  // no swap, yes use, done if not already done, undo if we have a flow
-  setButtonDisabled($('#swapbutton'), true)
+  // no swap, yes use, undo if we have a flow
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#donebutton'), done);
   setButtonDisabled($('#undobutton'), flow.length < 2);
 
   // Display asana list related
   document.getElementById("tos").style.display = "block";
-  document.getElementById("replace").style.display = "none"
+  document.getElementById("replace").style.display = "none";
+  scrollToEnd();
+  G_swap = false
 }
 
 function indexof(identifier, inArray) {
@@ -305,25 +294,19 @@ function indexof(identifier, inArray) {
 
 function undo() {
   var last_in_flow;
-  if(done) {
-    last_in_flow = flow[flow.length-1];
-    done = false;
-  } else {
-    last_in_flow = flow.pop();
-    updateAttCount(asanas[indexof(last_in_flow, asanas)]);
-  current = indexof(flow[flow.length-1], asanas)
-  };
+  last_in_flow = flow.pop();
+  updateAttCount(asanas[indexof(last_in_flow, asanas)]);
+  current = indexof(flow[flow.length-1], asanas);
   
   $("#flowthusfar ul li:last").remove();
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#donebutton'), false);
-  setButtonDisabled($('#swapbutton'), true);
   setButtonDisabled($('#undobutton'), flow.length < 2);
   displayAsana()
 }
 
 // User selected a non-last asana, select it and load potential replacements.
 function backUp(PosId) {
+  G_swap=true;
   $('img').removeClass('focused');
   $('#' + PosId + ' img').addClass('focused');
 
@@ -331,10 +314,8 @@ function backUp(PosId) {
   altOrigPos=PosId-1;
 
   // only the sawp buttonis allowed
-  setButtonDisabled($('#usebutton'), true);
-  setButtonDisabled($('#donebutton'), true);
+  setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
-  setButtonDisabled($('#swapbutton'), false)
 
   // Flow member to the left, to the right and the one being targeted (middle).
   replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
@@ -345,7 +326,8 @@ function replacements(Id, Id2, CurrentId) {
          { cache: false,
            success: function(data, code, xhr) {
              populateAlts(data.replacements, CurrentId)
-         }})}
+         }})
+}
 
 
 // populate the select component with potential replacements

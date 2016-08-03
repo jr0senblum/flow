@@ -2,10 +2,8 @@
 -compile(export_all).
 
 
-% for view/admin/asana.html: return all asanas, update an asana.
 landing('GET', []) ->
-    Flows = boss_db:find(flow,[],[{order_by,name}]),
-    {ok, [{flows, Flows}]}.
+    {ok, []}.
 
 flows('GET', []) ->
     Flows = boss_db:find(flow,[],[{order_by,name}]),
@@ -20,7 +18,7 @@ edit('POST',[]) ->
     Id = binary_to_list(Req:post_param(<<"id">>)),
     Name = binary_to_list(Req:post_param(<<"name">>)),
     Description = binary_to_list(Req:post_param(<<"description">>)),
-    io:format("it is ~p~n",[{Id, Name, Description}]),
+
     case Id of
         "new" -> 
             F = flow:new(id, Name, Description, ""),

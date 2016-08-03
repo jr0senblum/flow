@@ -15,12 +15,12 @@
   </head>
   <body>
     <div class="container-fluid">
+
       <div class="row">
 	<div class="col-md-12">
-          <table id="flows" class="table table-condensed table-striped">
+          <table id="flows" class="table table-condensed table-striped tableSection">
 	    <thead>
 	      <tr>
-		<th>#</th>
 		<th>Name</th>
 		<th>Description</th>
 	      </tr>
@@ -33,14 +33,14 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-	  <div class="btn-group">
+	  <div id="buttons" class="btn-group">
 	    <button id="gobutton" class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-exclamation-sign"></em> Go
 	    </button>
 	    <button id="editbutton" class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-edit"></em> Edit
 	    </button> 
-	    <button class="btn btn-default" type="button" onclick="newfield()")>
+	    <button class="btn btn-default" type="button" onclick="newFlow()">
 	      <em class="glyphicon glyphicon-plus-sign"></em> New
 	    </button> 
               <button id="deletebutton" type="button" class="btn btn-default">
@@ -48,12 +48,16 @@
 	      </button>
 	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-print"></em> Print
+	    </button>
+	    <button class="btn btn-default" type="button">
+	      <a  href="/admin/asana"><em class="glyphicon glyphicon-list-alt"></em> Admin</a>
 	    </button> 
+
+	  </div> 
             <div id="div1"></div>
-	  </div>
           <div class="form-group">
             <form action="" display="none" method="">
-              <input type="hidden" id="id" name="id" class="form-control">
+              <input type="hidden" id="id" name="id">
               <label for="name">Name</label>
               <input type="text" id = "name" name="name" class="form-control">
               <label for="desc">Description</label>
@@ -61,10 +65,9 @@
               <button id="submitbutton" type="button" class="btn btn-default">
 		Submit
 	      </button>
-              <button type="button" class="btn btn-default" onclick="hideForm()">
+             <button class="btn btn-default" type="submit" onclick="reset()">
 		Cancel
 	      </button>
-
             </form>
           </div>
 	</div>
@@ -80,7 +83,8 @@
 
 
 $(document).ready(function() {
-  loadAllFlows()
+  loadAllFlows();
+  reset()
 });
 
 function loadAllFlows() {
@@ -102,7 +106,7 @@ function populateFlows(choices, control) {
     var clickFn = "showfield('" + id + "', '" + name + "', '" + description + "')";
     Rows = Rows + 
       '<tr class="active" onclick="' + clickFn + '")>' + 
-      '<td>' + id + '</td> <td>' + name + '</td> <td>' + description + '</td> </tr>'
+      '<td>' + name + '</td> <td>' + description + '</td> </tr>'
   };
   control.html(Rows)
 }
@@ -114,8 +118,7 @@ function update(Id) {
           name:$("#name").val(),
           description:$("#desc").val()},
          function(data,status) {
-           hideForm();
-           clear();
+           reset();
            loadAllFlows()
          });
 }
@@ -125,57 +128,65 @@ function del(Id) {
   $.post("/landing/delete",
          {id:Id},
          function(data,status) {
-           hideForm();
-           clear();
+           reset();
            loadAllFlows()
          });
 }
 
 
 
-function clear() {
+function reset() {
   $("#div1").html('<input type="text" readonly value=""/>');
   $("#id").val(""); 
   $("#name").val("");
-  $("#desc").val("")
+  $("#desc").val("");
+  flowsOnly()
 }
-
-function hideForm() {
-  $("form").hide();
-  $("#div1").show();
-};
-
-
-$("form").hide();
 
 function showfield(id, name, desc) {
   $("#div1").html('<input type="text" readonly value="' + name + '"/>')
   $("#id").val(id);
   $("#name").val(name);
   $("#desc").val(desc);
-  $("#gobutton").attr('onclick', "location.href='/create/create/" + id + "'");
-  $("#editbutton").attr('onclick', "editfield('" + id + "','" + name + "','"+desc+"')");
+  $("#gobutton").attr('disabled', false).attr('onclick', "location.href='/create/create/" + id + "'");
+  $("#editbutton").attr('disabled', false).attr('onclick', "editFlow('" + id + "','" + name + "','"+desc+"')");
   $("#submitbutton").attr('onclick', "update('" + id + "')")
-  $("#deletebutton").attr('onclick', "del('" + id + "')")
+  $("#deletebutton").attr('disabled', false).attr('onclick', "del('" + id + "')")
 }
 
 
-function editfield(id, name, desc) {
-  $("#div1").hide();
-  $("form").show(); 
+function editFlow(id, name, desc) {
+  formOnly();
   $("#name").val(name);
   $("#desc").val(desc);
 }
 
 
-function newfield() {
-  $("#div1").hide();
-  $("form").show();
+function newFlow() {
+  formOnly();
   $("#id").val("new"); 
   $("#name").val("");
   $("#desc").val("");
   $("#submitbutton").attr('onclick', "update('new')")
 }
+
+function formOnly() {
+  $("#flows").hide();                  
+  $("#buttons").hide();                  
+  $("#div1").hide();
+  $("form").show()
+}
+
+function flowsOnly() {
+  $("#editbutton").attr('disabled', true)
+  $("#gobutton").attr('disabled', true)
+  $("#deletebutton").attr('disabled', true)
+  $("#flows").show();                  
+  $("#buttons").show();                  
+  $("#div1").show();
+  $("form").hide()
+}
+
 
 
 </script>

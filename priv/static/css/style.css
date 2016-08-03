@@ -12,7 +12,7 @@
     }
     table.tableSection tbody {
         overflow: auto;
-        height: 150px;
+        height: 200px;
     }
     table.tableSection tr {
         width: 100%;

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>Create!</title>
+    <title>Flows</title>
     
     <meta name="description" content="Source code generated using layoutit.com">
     <meta name="author" content="LayoutIt!">
@@ -35,7 +35,7 @@
         <div class="col-md-12">
 	  <div id="buttons" class="btn-group">
 	    <button id="gobutton" class="btn btn-default" type="button">
-	      <em class="glyphicon glyphicon-exclamation-sign"></em> Go
+	      <em class="glyphicon glyphicon-link"></em> Go
 	    </button>
 	    <button id="editbutton" class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-edit"></em> Edit
@@ -44,7 +44,7 @@
 	      <em class="glyphicon glyphicon-plus-sign"></em> New
 	    </button> 
               <button id="deletebutton" type="button" class="btn btn-default">
-		Delete
+	        <em class="glyphicon glyphicon-remove"></em> Delete
 	      </button>
 	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-print"></em> Print
@@ -136,7 +136,7 @@ function del(Id) {
 
 
 function reset() {
-  $("#div1").html('<input type="text" readonly value=""/>');
+  $("#div1").html('<label>Selected:<input type="text" readonly value=""/></label>');
   $("#id").val(""); 
   $("#name").val("");
   $("#desc").val("");
@@ -144,7 +144,7 @@ function reset() {
 }
 
 function showfield(id, name, desc) {
-  $("#div1").html('<input type="text" readonly value="' + name + '"/>')
+  $("#div1").html('<label>Selected: <input type="text" readonly value="' + name + '"/></label>')
   $("#id").val(id);
   $("#name").val(name);
   $("#desc").val(desc);

@@ -5,63 +5,56 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    
     <title>Create</title>
-    
-    
     <meta name="description" content="Source code generated using layoutit.com">
     <meta name="author" content="LayoutIt!">
-    
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
-
   </head>
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xs-7"> 
+        <div class="col-xs-4"> 
+          <div class="btn-group-sm">
+	    <button id="usebutton" class="btn btn-sm" type="button" onclick="selectAsana()">
+	      <em class="glyphicon glyphicon-link" ></em> 
+	    </button>
+	    <button id="undobutton" class="btn btn-sm" type="button" onclick="undo()">
+	      <em  class="glyphicon glyphicon-step-backward" ></em>
+	    </button>
+	    <button  class="btn btn-sm" type="button" onclick="save()">
+	      <em class="glyphicon glyphicon-save"></em>
+            </button>
+	    <button  class="btn btn-sm" type="button">
+	      <a href="/"> <em class="glyphicon glyphicon-tasks"></em></a>
+            </button>
+          </div>
           <div>
             <a id="ename" class="text-left text-success">Starting</a>  
           </div>
           <div>
-            <img id="pic" src="" onclick="restore()"></img>
+            <img id="pic" src="" onclick="restore()" heigth="75" width="75"></img>
           </div>
         </div>
-        <div class="col-xs-5">
-          <div class="btn-group-sm">
-	    <button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()">
-	      <em class="glyphicon glyphicon-link" ></em> 
-	    </button>
-	     <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
-	       <em  class="glyphicon glyphicon-step-backward" ></em>
-	     </button>
-	    <button  class="btn btn-default" type="button" onclick="save()">
-	      <em class="glyphicon glyphicon-save"></em>
-            </button>
-	    <button  class="btn btn-default" type="button">
-	      <a href="/"> <em class="glyphicon glyphicon-tasks"></em></a>
-            </button>
-
-          </div>
-          <div class="btn-group-sm">
-	    <button class="btn btn-default" type="button">
-	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" class="badge"></span>
-            </button>
-	    <button class="btn btn-default" type="button">
-	      <em class="glyphicon glyphicon-object-align-vertical" ></em><span id="attB" class="badge"></span>
-            </button>
-	    <button  class="btn btn-default" type="button">
-	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF" class="badge"></span>
-            </button>
-          </div>
-
+        <div class="col-xs-3">
           <div>
             <select id="tos" data-placeholder="Next..."
                     class="select"> 
             </select>
           </div>
-
+        </div>
+        <div class="col-xs-5">
+          <div class="btn-group-sm" style="float:right">
+	    <button class="btn btn-sm" type="button">
+	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" ></span>
+            </button>
+	    <button class="btn btn-sm" type="button">
+	      <em class="glyphicon glyphicon-object-align-vertical" ></em><span id="attB"></span>
+            </button>
+	    <button  class="btn btn-sm" type="button">
+	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF"></span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -123,7 +116,7 @@ function loadAllAsana(index) {
 
 // Display the image of the current asana and its name.
 function displayAsana() {
-  $("#ename").text(asanas[current].name + " (" + asanas[current].sanskrit + ")"); 
+  $("#ename").text(asanas[current].name); 
   $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
   getRelatedAsana();
 }

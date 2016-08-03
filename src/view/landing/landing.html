@@ -17,7 +17,7 @@
     <div class="container-fluid">
       <div class="row">
 	<div class="col-md-12">
-          <table class="table table-condensed table-striped">
+          <table id="flows" class="table table-condensed table-striped">
 	    <thead>
 	      <tr>
 		<th>#</th>
@@ -26,15 +26,6 @@
 	      </tr>
 	    </thead>
 	    <tbody>
-	    {% if flows %} 
-	    {% for f in flows%}
-	      <tr class="active"  onclick="showfield('{{f.id}}', '{{f.name}}', '{{f.description}}')">
-		<td>{{f.id}}</td>
-		<td>{{f.name}}</td>
-		<td>{{f.description}}</td>
-	      </tr>
-              {% endfor %}
-              {% endif %}
 	    </tbody>
 	  </table>
         </div>
@@ -52,19 +43,22 @@
 	    <button class="btn btn-default" type="button" onclick="newfield()")>
 	      <em class="glyphicon glyphicon-plus-sign"></em> New
 	    </button> 
+              <button id="deletebutton" type="button" class="btn btn-default">
+		Delete
+	      </button>
 	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-print"></em> Print
 	    </button> 
             <div id="div1"></div>
 	  </div>
           <div class="form-group">
-            <form action="landing/edit" display="none" method="post" onsubmit="setTimeout(function () { window.location.reload(); }, 10)">
+            <form action="" display="none" method="">
               <input type="hidden" id="id" name="id" class="form-control">
               <label for="name">Name</label>
               <input type="text" id = "name" name="name" class="form-control">
               <label for="desc">Description</label>
               <input type="text" id="desc" name="description" class="form-control">
-              <button type="submit" class="btn btn-default">
+              <button id="submitbutton" type="button" class="btn btn-default">
 		Submit
 	      </button>
               <button type="button" class="btn btn-default" onclick="hideForm()">
@@ -84,6 +78,68 @@
 <script src="/static/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 
+
+$(document).ready(function() {
+  loadAllFlows()
+});
+
+function loadAllFlows() {
+  $.ajax("/landing/flows",
+         { cache: false,
+           success: function(data, code, xhr) {
+             flows = data.flows;
+             populateFlows(flows, $("#flows > tbody"));
+           }});
+}
+
+// Load table with flow information
+function populateFlows(choices, control) {
+  var Rows = "";
+  for (i = 0; i < choices.length; i++) {
+    var id = choices[i].id;
+    var name = choices[i].name;
+    var description = choices[i].description;
+    var clickFn = "showfield('" + id + "', '" + name + "', '" + description + "')";
+    Rows = Rows + 
+      '<tr class="active" onclick="' + clickFn + '")>' + 
+      '<td>' + id + '</td> <td>' + name + '</td> <td>' + description + '</td> </tr>'
+  };
+  control.html(Rows)
+}
+
+// Saving changes to a flow.
+function update(Id) {
+  $.post("/landing/edit",
+         {id:Id,
+          name:$("#name").val(),
+          description:$("#desc").val()},
+         function(data,status) {
+           hideForm();
+           clear();
+           loadAllFlows()
+         });
+}
+
+// Saving changes to a flow.
+function del(Id) {
+  $.post("/landing/delete",
+         {id:Id},
+         function(data,status) {
+           hideForm();
+           clear();
+           loadAllFlows()
+         });
+}
+
+
+
+function clear() {
+  $("#div1").html('<input type="text" readonly value=""/>');
+  $("#id").val(""); 
+  $("#name").val("");
+  $("#desc").val("")
+}
+
 function hideForm() {
   $("form").hide();
   $("#div1").show();
@@ -98,7 +154,9 @@ function showfield(id, name, desc) {
   $("#name").val(name);
   $("#desc").val(desc);
   $("#gobutton").attr('onclick', "location.href='/create/create/" + id + "'");
-  $("#editbutton").attr('onclick', "editfield('" + id + "','" + name + "','"+desc+"')")
+  $("#editbutton").attr('onclick', "editfield('" + id + "','" + name + "','"+desc+"')");
+  $("#submitbutton").attr('onclick', "update('" + id + "')")
+  $("#deletebutton").attr('onclick', "del('" + id + "')")
 }
 
 
@@ -116,6 +174,7 @@ function newfield() {
   $("#id").val("new"); 
   $("#name").val("");
   $("#desc").val("");
+  $("#submitbutton").attr('onclick', "update('new')")
 }
 
 

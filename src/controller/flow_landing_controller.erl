@@ -7,10 +7,20 @@ landing('GET', []) ->
     Flows = boss_db:find(flow,[],[{order_by,name}]),
     {ok, [{flows, Flows}]}.
 
+flows('GET', []) ->
+    Flows = boss_db:find(flow,[],[{order_by,name}]),
+    {json, [{flows, Flows}]}.
+
+delete('POST',[]) ->
+    Id = binary_to_list(Req:post_param(<<"id">>)),
+    boss_db:delete(Id),
+    {205, "reset content", []}.
+
 edit('POST',[]) ->
     Id = binary_to_list(Req:post_param(<<"id">>)),
     Name = binary_to_list(Req:post_param(<<"name">>)),
     Description = binary_to_list(Req:post_param(<<"description">>)),
+    io:format("it is ~p~n",[{Id, Name, Description}]),
     case Id of
         "new" -> 
             F = flow:new(id, Name, Description, ""),

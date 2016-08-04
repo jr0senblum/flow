@@ -40,3 +40,7 @@ ul.images li {
 select {border: 1px solid black;}
 
 
+figcaption { 
+    display: block;
+    text-align:center;
+}

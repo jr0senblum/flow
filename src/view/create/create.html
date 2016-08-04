@@ -18,28 +18,29 @@
       <div class="row">
         <div class="col-xs-4"> 
           <div class="btn-group-sm">
-	    <button id="usebutton" class="btn btn-sm" type="button" onclick="selectAsana()">
+	    <Button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()" style="float:left;">
 	      <em class="glyphicon glyphicon-link" ></em> 
 	    </button>
-	    <button id="undobutton" class="btn btn-sm" type="button" onclick="undo()">
+	    <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
 	      <em  class="glyphicon glyphicon-step-backward" ></em>
 	    </button>
-	    <button  class="btn btn-sm" type="button" onclick="save()">
+	    <button  class="btn btn-default" type="button" onclick="save()">
 	      <em class="glyphicon glyphicon-save"></em>
             </button>
-	    <button  class="btn btn-sm" type="button">
+	    <button  class="btn btn-default" type="button">
 	      <a href="/"> <em class="glyphicon glyphicon-tasks"></em></a>
             </button>
           </div>
           <div>
-            <a id="ename" class="text-left text-success">Starting</a>  
+
           </div>
           <div>
-            <img id="pic" src="" onclick="restore()" heigth="75" width="75"></img>
+            <img id="pic" src="" onclick="restore()" heigth="75" width="75" styple="display:inline;"></img>
           </div>
         </div>
         <div class="col-xs-3">
           <div>
+            <p id="ename" style="float:rigth;">Select starting asana</p> 
             <select id="tos" data-placeholder="Next..."
                     class="select"> 
             </select>
@@ -47,13 +48,13 @@
         </div>
         <div class="col-xs-5">
           <div class="btn-group-sm" style="float:right">
-	    <button class="btn btn-sm" type="button">
+	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" ></span>
             </button>
-	    <button class="btn btn-sm" type="button">
+	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-object-align-vertical" ></em><span id="attB"></span>
             </button>
-	    <button  class="btn btn-sm" type="button">
+	    <button  class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF"></span>
             </button>
           </div>
@@ -204,9 +205,14 @@ function use() {
   $('img').removeClass('focused');
 
   var comp = $("#tos")[0];
-  var new_asana_id = comp.options[comp.selectedIndex].value;
-  var name = comp.options[comp.selectedIndex].text;
+  var new_asana_id;
+  var name;
 
+
+    new_asana_id = comp.options[comp.selectedIndex].value;
+    name = comp.options[comp.selectedIndex].text
+
+    
   var old_current = current;
   current = indexof(new_asana_id, asanas);
 

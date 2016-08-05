@@ -24,11 +24,11 @@
 	    <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
 	      <em  class="glyphicon glyphicon-step-backward" ></em>
 	    </button>
-	    <button  class="btn btn-default" type="button" onclick="save()">
-	      <em class="glyphicon glyphicon-save"></em>
+	    <button  id="savebutton" class="btn btn-default" type="button" onclick="save()">
+	      <em id="save" class="glyphicon glyphicon-saved" ></em>
             </button>
-	    <button  class="btn btn-default" type="button">
-	      <a href="/"> <em class="glyphicon glyphicon-tasks"></em></a>
+	    <button  id="taskbutton" class="btn btn-default" type="button" onclick="location.href='/'">
+	     <em class="glyphicon glyphicon-tasks"></em></a>
             </button>
           </div>
           <div>
@@ -79,9 +79,20 @@
 $(document).ready(function() {
   loadAllAsana(0);
   setAtt();
+  buttonModeSave(true);
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
 })
+
+function buttonModeSave(bValue) {
+    setButtonDisabled($("#savebutton"), bValue);
+    setButtonDisabled($("#taskbutton"), !bValue);
+  if (bValue == true) {
+    $("#save").removeClass("glyphicon-save").addClass("glyphicon-saved")
+  } else {
+    $("#save").removeClass("glyphicon-saved").addClass("glyphicon-save");
+  };
+}
 
 
 // whenever the selection changes, update the displayed image
@@ -106,7 +117,7 @@ var nF = 0;
 function save() {
   $.post("/create/save/{{id}}",
          {updated_flow:JSON.stringify(flow)},
-         function(data,status) { });
+         function(data,status) { buttonModeSave(true)});
 }
 
 
@@ -208,6 +219,7 @@ function selectAsana() {
   } else { 
     use() 
   }
+  buttonModeSave(false)
 }
 
 function use() {
@@ -295,8 +307,9 @@ function undo() {
   $("#flowthusfar ul li:last").remove();
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
-  displayAsanaName()
+  displayAsanaName();
   getRelatedAsana();
+  buttonModeSave(false)
 }
 
 // User selected a non-last asana, select it and load potential replacements.

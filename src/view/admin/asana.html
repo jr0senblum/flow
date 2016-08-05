@@ -17,54 +17,51 @@
   
   <body>
     <div class="container-fluid">
-      <div id="main" class="row">
+      <div class="row">
 	<div class="col-md-4">
-	  <p id="ename" class="text-left text-success"> </p>
 	  <div class="btn-group">
-	    <button id="left" class="btn btn-sm" type="button" onclick="previous()">
+	    <button id="left" class="btn btn-default" type="button" onclick="previous()">
 	      <em class="glyphicon glyphicon-chevron-left" ></em> 
 	    </button>
-	    <button id="right" class="btn btn-sm" type="button" onclick="next()">
+	    <button id="right" class="btn btn-default" type="button" onclick="next()">
 	      <em  class="glyphicon glyphicon-chevron-right" ></em>
 	    </button>
-	    <button  id="savebutton"class="btn btn-sm" type="button" onclick="saveCurrent()">
+	    <button  id="savebutton" class="btn btn-default" type="button" onclick="saveCurrent()">
 	      <em  id="save" class="glyphicon glyphicon-saved" ></em>
 	    </button>
-	    <button id="reset" class="btn btn-sm" type="button" onclick="reset()">
+	    <button id="reset" class="btn btn-default" type="button" onclick="reset()">
 	      <em  class="glyphicon glyphicon-refresh" ></em> 
 	    </button>
-
-	    <button  id="savebutton"class="btn btn-sm" type="button">
-	      <a href="/"><em  id="save" class="glyphicon glyphicon-tasks" ></em></a>
+	    <button  id="detailsbutton" class="btn btn-default" type="button" onclick="details()">
+	      <em id="detailsem" class="glyphicon glyphicon-th" ></em>
 	    </button>
-           
+	    <button id="landingbutton" class="btn btn-default" type="button">
+	      <a id="landingref" href="/"><em class="glyphicon glyphicon-tasks" ></em></a>
+	    </button>
+	  <p id="ename" class="text-left text-success"> </p>           
 	  </div>
           
-          <div> <img id="pic"  alt="Asana Picture" src={{ path }}></div>
-          <div class="btn-group">
-	    <button class="btn btn-sm" type="button" onclick="toggleAttribute('strength')">
+          <div id="main"> <img id="pic"  alt="Asana Picture" src={{ path }}></div>
+          <div id="main1" class="btn-group">
+	    <button class="btn btn-default" type="button" onclick="toggleAttribute('strength')">
 	      <em id="strength" class="glyphicon glyphicon-ok"></em> Strength
 	    </button>
-	    <button class="btn btn-sm" type="button" onclick="toggleAttribute('ballance')">
+	    <button class="btn btn-default" type="button" onclick="toggleAttribute('ballance')">
 	      <em id="ballance" class="glyphicon glyphicon-ok" ></em> Ballance
 	    </button>
-	    <button  class="btn btn-sm" type="button" onclick="toggleAttribute('flexibility')">
+	    <button  class="btn btn-default" type="button" onclick="toggleAttribute('flexibility')">
 	      <em id="flexibility" class="glyphicon glyphicon-ok"></em> Flexibility
 	    </button> 
-	    <button  id="detailsebutton"class="btn btn-sm" type="button" onclick="details()">
-	      <em  id="save" class="glyphicon glyphicon-th" ></em>
-	    </button>
 	  </div>
-
 	</div>
-        <div  class="col-md-8">
+        <div id="main2" class="col-md-8">
 	  <div style="float:left">
             <p class="text-left text-info">Enters from...</p>
             <select id="froms" data-placeholder="Choose asanas..." style="width:250px;"
                     multiple class="chosen-select">
             </select>
           </div>
-          <div style="float:left">
+          <div id="main3"style="float:left">
 	    <p class="text-left text-info"> Exits to...</p>
             <select id="tos" data-placeholder="Choose asanas..." style="width:250px;" 
                     multiple class="chosen"> 
@@ -74,13 +71,6 @@
       </div>
       <div id="details" class="row">
         <div class="col-md-6">
-          <div>
-	    <p id="fname" class="text-left text-success"> </p>
-	    <button  id="detailsebutton"class="btn btn-sm" type="button" onclick="header()">
-	      <em  id="save" class="glyphicon glyphicon-th-large" ></em>
-	    </button>            
-          </div>
-
           <table id="mg" class="table table-condensed table-striped tableSection">
 	    <thead>
 	      <tr>
@@ -233,6 +223,13 @@ function setSaveButton(state) {
     $("#save").removeClass("glyphicon-saved").addClass("glyphicon-save");
   };
   $("#savebutton").prop("disabled", state);
+
+  $("#landingbutton").prop("disabled", !state);
+  if (state) {
+      $("#landingref").prop('href', "/")
+    } else {
+      $("#landingref").prop('href', "#")
+    };
   setNextPrevStatus()
 }
 
@@ -322,7 +319,6 @@ function sel(n) {
 
 function displayAsana() {
   $("#ename").text(asanas[current].name + " - " + asanas[current].sanskrit);
-  $("#fname").text(asanas[current].name + " - " + asanas[current].sanskrit);
   setAttributeButton($("#strength"), asanas[current].strength); 
   setAttributeButton($("#ballance"), asanas[current].ballance); 
   setAttributeButton($("#flexibility"), asanas[current].flexibility)
@@ -348,13 +344,24 @@ function toggleAttribute(attribute) {
 };
 
 function header() {
- $("#main").show();
- $("#details").hide();
+  document.getElementById("detailsbutton").setAttribute('onclick','details()');
+  $("#detailsem").removeClass("glyphicon-th-large").addClass("glyphicon-th")
+  $("#main").show();
+  $("#main1").show();
+  $("#main2").show();
+  $("#main3").show();
+  $("#details").hide();
 }
 
 function details() {
- $("#main").hide();
- $("#details").show();  
+  document.getElementById("detailsbutton").setAttribute('onclick','header()');
+  $("#detailsem").removeClass("glyphicon-th").addClass("glyphicon-th-large")
+  $("#main").hide();
+  $("#main1").hide();
+  $("#main2").hide();
+  $("#main3").hide();
+  $("#details").show();  
+
 }
 
    </script>

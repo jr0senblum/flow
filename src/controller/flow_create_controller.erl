@@ -50,6 +50,7 @@ replacements('GET', [AsanaIdLeft, AsanaIdRight]) when AsanaIdLeft == "undefined"
     Works = (boss_db:find(AsanaIdRight)):enters_from(),
     {json, [{replacements, Works}]};
 
+
 replacements('GET', [AsanaIdLeft, AsanaIdRight]) ->
     AsanaLeftExits = sets:from_list((boss_db:find(AsanaIdLeft)):exits_to()),
     AsanaRightEnters = sets:from_list((boss_db:find(AsanaIdRight)):enters_from()),

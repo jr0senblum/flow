@@ -84,6 +84,15 @@ $(document).ready(function() {
 })
 
 
+// whenever the selection changes, update the displayed image
+$( "#tos" ).change(function() {
+  var new_asana_id = this.options[this.selectedIndex].value;
+  var name = this.options[this.selectedIndex].text;
+  $("#pic").attr('src', "/static/stickfigures/" + name.toLowerCase() + ".jpg");
+});
+
+
+
 var asanas = new Array(); // array of all asanas
 var current = 0;          // indext into asanas of current asana
 var flow = [];           // Array of asana-ids of the flow being constructed
@@ -108,29 +117,15 @@ function loadAllAsana(index) {
            success: function(data, code, xhr) {
              asanas = data.asanas;
              current = -1;
-             populateChoices(data.asanas, $("#tos"));
+             populateChoices(data.asanas);
              load_flow() 
            }});
 
 }
 
-// Display the image of the current asana and its name.
-function displayAsana() {
-  $("#ename").text(asanas[current].name); 
-  $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
-  getRelatedAsana();
-}
-
-// Fetch Asana previously selected after the current one.
-function getRelatedAsana() {
-  $.ajax("/create/related/" + asanas[current].id,
-         { cache: false,
-           success: function(data, code, xhr) {
-             populateChoices(data.exits, $('#tos'))
-         }})}
-
-// Populate exiting or alternative asanas.
-function populateChoices(choices, control) {
+// Populate drop down with asanas.
+function populateChoices(choices) {
+  var control = $("#tos");
   var Rows = "</option><optgroup label='Previously linked'>";
   var Found = new Array();
   
@@ -143,7 +138,7 @@ function populateChoices(choices, control) {
   Rows = Rows + "</optgroup>"
   control.html(Rows);
 
-  Rows = "<optgroup label='Not used'>";
+  Rows = "<optgroup label='Not linked'>";
   for (i = 0; i < asanas.length; i++) {
     if (Found.indexOf(asanas[i].id) == -1 && i != current) {
       Rows = Rows + 
@@ -153,13 +148,7 @@ function populateChoices(choices, control) {
   }
   Rows = Rows + "</optgroup>";
   control.append(Rows);
-}
-
-// make sure that the the horizonaal list of flow_thus_far shows the last asana.
-function scrollToEnd() {
-  var flow_list  = $("#flowthusfar ul");
-  var width = flow_list[0].scrollWidth;
-  if (flow_list) flow_list.scrollLeft(width)
+  control.change()
 }
 
 
@@ -169,6 +158,8 @@ function load_flow() {
    {% for f in flow %}
     load_asana_from_flow('{{f}}');
    {% endfor %}
+  displayAsanaName();
+  getRelatedAsana();
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
   scrollToEnd();
@@ -176,22 +167,41 @@ function load_flow() {
 }
 
 function load_asana_from_flow(asana_id) {
-  var old_current = current;
-  current = indexof(asana_id, asanas);
+  current = indexInAsanas(asana_id);
   updateAttCount(asanas[current], true);
-  displayAsana();
   flow.push(asana_id);
-  if (old_current > -1) {
-    var oldHead = asanas[old_current];
-    var oldHeadId = asanas[old_current].id;
-    var Id = (flow.length - 1).toString();
-    var Row = '<li id="' + Id + '">' +
-        '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\'' + Id + '\' )"></li>';  
-    var List  = $("#flowthusfar ul");
-    List.append(Row)
-  }
+
+  var Head = asanas[current];
+  var Id = (flow.length - 1).toString();
+  var Row = '<li id="' + Id + '">' +
+      '<img src="/static/stickfigures/' + 
+      Head.name.toLowerCase() + '.jpg" onclick="backUp(' + Id + ')"></li>';  
+  $("#flowthusfar ul").append(Row)
 }
          
+
+// Display the name of the current asana.
+function displayAsanaName() {
+  $("#ename").text(asanas[current].name); 
+}
+
+// Fetch Asana previously selected after the current one.
+function getRelatedAsana() {
+  $.ajax("/create/related/" + asanas[current].id,
+         { cache: false,
+           success: function(data, code, xhr) {
+             populateChoices(data.exits)
+         }})}
+
+
+// make sure that the the horizontal list of flow_thus_far shows the last asana.
+function scrollToEnd() {
+  var flow_list  = $("#flowthusfar ul");
+  var width = flow_list[0].scrollWidth;
+  if (flow_list) flow_list.scrollLeft(width)
+}
+
+
 function selectAsana() {           
   if (G_swap) { 
     swap() 
@@ -208,28 +218,23 @@ function use() {
   var new_asana_id;
   var name;
 
-
-    new_asana_id = comp.options[comp.selectedIndex].value;
-    name = comp.options[comp.selectedIndex].text
-
+  new_asana_id = comp.options[comp.selectedIndex].value;
+  name = comp.options[comp.selectedIndex].text
     
-  var old_current = current;
-  current = indexof(new_asana_id, asanas);
+  current = indexInAsanas(new_asana_id);
 
   updateAttCount(asanas[current],true);
-  displayAsana();
-
+  displayAsanaName();
+  getRelatedAsana();
   flow.push(new_asana_id);
+  
+  var Head = asanas[current];
+  var Id = (flow.length - 1).toString();
+  var Row = '<li id="' + Id + '">' +
+      '<img src="/static/stickfigures/' + Head.name.toLowerCase() + '.jpg" ' + 
+      'onclick="backUp(' + Id + ')"></li>';  
+  $("#flowthusfar ul").append(Row);
 
-  if (old_current > -1) {
-    var oldHead = asanas[old_current];
-    var oldHeadId = asanas[old_current].id;
-    var Id = (flow.length - 1).toString();
-    var Row = '<li id="' + Id + '">' +
-      '<img src="/static/stickfigures/' + oldHead.name.toLowerCase() + '.jpg" onclick="backUp(\'' + Id + '\' )"></li>';  
-    var List  = $("#flowthusfar ul");
-    List.append(Row);
-  };
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
   scrollToEnd();
@@ -249,10 +254,9 @@ function swap() {
       flow[altOrigPos] = newAsinaId;
       recalcAtt();
 
-      // update teh image and onclick attributes in the list of flow asanas
-      var rowIndex = altOrigPos + 1;
-      $("#"+rowIndex+" img").attr('src','/static/stickfigures/' + name.toLowerCase() + '.jpg')
-      $("#"+rowIndex+" img").attr('onclick','backUp("'+rowIndex+'")');
+      // update the image and onclick attributes in the list of flow asanas
+      $("#" + altOrigPos + " img").attr('src','/static/stickfigures/' + name.toLowerCase() + '.jpg')
+      $("#"+ altOrigPos + " img").attr('onclick','backUp('+ altOrigPos +')');
     }
   }
 }
@@ -270,8 +274,8 @@ function restore() {
   G_swap = false
 }
 
-function indexof(identifier, inArray) {
-  var found = inArray.findIndex(function(el,i,a) 
+function indexInAsanas(identifier) {
+  var found = asanas.findIndex(function(el,i,a) 
                                { if (el.id == identifier) {
                                  return true
                                } else { 
@@ -285,13 +289,14 @@ function indexof(identifier, inArray) {
 function undo() {
   var last_in_flow;
   last_in_flow = flow.pop();
-  updateAttCount(asanas[indexof(last_in_flow, asanas)], false);
-  current = indexof(flow[flow.length-1], asanas);
+  updateAttCount(asanas[indexInAsanas(last_in_flow)], false);
+  current = indexInAsanas(flow[flow.length-1]);
   
   $("#flowthusfar ul li:last").remove();
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
-  displayAsana()
+  displayAsanaName()
+  getRelatedAsana();
 }
 
 // User selected a non-last asana, select it and load potential replacements.
@@ -300,15 +305,19 @@ function backUp(PosId) {
   $('img').removeClass('focused');
   $('#' + PosId + ' img').addClass('focused');
 
+
+  $("#ename").text(asanas[indexInAsanas(flow[PosId])].name); 
+
+
   // record the position of the asana targted for replacement.
-  altOrigPos=PosId-1;
+  altOrigPos=PosId;
 
   // only the sawp buttonis allowed
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
 
   // Flow member to the left, to the right and the one being targeted (middle).
-  replacements(flow[PosId-2], flow[PosId], flow[PosId-1])
+  replacements(flow[PosId-1], flow[PosId+1], flow[PosId])
 }
 
 function replacements(Id, Id2, CurrentId) {
@@ -324,7 +333,7 @@ function replacements(Id, Id2, CurrentId) {
 // add all other asanas
 function populateAlts(Items, SelectedId) {
   var control = $("#tos");
-  var Rows = "<option value=''></option><optgroup label='Previously linked'>";
+  var Rows = "</option><optgroup label='Previously linked'>";
 
   var Found = new Array();
   
@@ -351,13 +360,14 @@ function populateAlts(Items, SelectedId) {
   }
   Rows = Rows + "</optgroup>";
   control.append(Rows);
+  control.change()
 }
 
 
 function recalcAtt() {
   nS=0; nB=0; nF=0;
   flow.forEach(function(Id, i) {
-    var Index = indexof(Id, asanas);
+    var Index = indexInAsanas(Id);
     updateAttCount(asanas[Index], true)
     })
 }
@@ -391,16 +401,13 @@ function setAtt() {
 
 
 // Button State Management
-//
+
 
 function setButtonState(state) {
   // change button state
   // state = true indicates button is off
   $("#usebutton").prop("disabled", false)
 }
-
-// Button State Management
-//
 
 function setButtonDisabled(button, state) {
   // change icon and text from save to saved and back again.

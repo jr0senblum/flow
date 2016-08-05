@@ -17,37 +17,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-4"> 
-          <div class="btn-group-sm">
-	    <Button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()" style="float:left;">
-	      <em class="glyphicon glyphicon-link" ></em> 
-	    </button>
-	    <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
-	      <em  class="glyphicon glyphicon-step-backward" ></em>
-	    </button>
-	    <button  id="savebutton" class="btn btn-default" type="button" onclick="save()">
-	      <em id="save" class="glyphicon glyphicon-saved" ></em>
-            </button>
-	    <button  id="taskbutton" class="btn btn-default" type="button" onclick="location.href='/'">
-	     <em class="glyphicon glyphicon-tasks"></em></a>
-            </button>
-          </div>
-          <div>
-
-          </div>
-          <div>
-            <img id="pic" src="" onclick="restore()" heigth="75" width="75" styple="display:inline;"></img>
-          </div>
-        </div>
-        <div class="col-xs-3">
-          <div>
-            <p id="ename" style="float:rigth;">Select starting asana</p> 
-            <select id="tos" data-placeholder="Next..."
-                    class="select"> 
-            </select>
-          </div>
-        </div>
-        <div class="col-xs-5">
-          <div class="btn-group-sm" style="float:right">
+          <div class="btn-group-sm" style="float:left">
 	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" ></span>
             </button>
@@ -57,6 +27,37 @@
 	    <button  class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF"></span>
             </button>
+          </div>
+
+          <div>
+
+          </div>
+          <div>
+            <img id="pic" src="" onclick="restore()" heigth="75" width="75" styple="display:inline;"></img>
+          </div>
+        </div>
+        <div class="col-xs-3">
+          <div>
+            <select id="tos" data-placeholder="Next..."
+                    class="selectpicker "> 
+            </select>
+          </div>
+        </div>
+        <div class="col-xs-5">
+          <div class="btn-group-sm" style="float:right">
+	    <Button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()">
+	      <em class="glyphicon glyphicon-link" ></em> 
+	    </button>
+	    <button id="undobutton" class="btn btn-default" type="button" onclick="undo()">
+	      <em  class="glyphicon glyphicon-step-backward" ></em>
+	    </button>
+	    <button  id="savebutton" class="btn btn-default" type="button" onclick="save()">
+	      <em id="save" class="glyphicon glyphicon-saved" ></em>
+            </button>
+	    <button  id="taskbutton" class="btn btn-default" type="button">
+  	      <a  href="/" id="taskref"><em class="glyphicon glyphicon-list-alt"></em></a>
+            </button>
+            <p id="ename">Select starting asana</p> 
           </div>
         </div>
       </div>
@@ -88,8 +89,10 @@ function buttonModeSave(bValue) {
     setButtonDisabled($("#savebutton"), bValue);
     setButtonDisabled($("#taskbutton"), !bValue);
   if (bValue == true) {
+    $("#taskref").prop('href', "/");
     $("#save").removeClass("glyphicon-save").addClass("glyphicon-saved")
   } else {
+    $("#taskref").prop('href', "#");
     $("#save").removeClass("glyphicon-saved").addClass("glyphicon-save");
   };
 }
@@ -351,8 +354,8 @@ function populateAlts(Items, SelectedId) {
   var Found = new Array();
   
   for (i = 0; i < Items.length; i++) {
-    var S;
-    if (Items[i].id == SelectedId) {S = " selected "} else {S = ""};
+    var S="";
+//    if (Items[i].id == SelectedId) {S = " selected "} else {S = ""};
     Rows = Rows + 
       '<option value="' + Items[i].id + '" ' + S + '>'+ 
       Items[i].name + '</option>';
@@ -364,8 +367,8 @@ function populateAlts(Items, SelectedId) {
   Rows = "<optgroup label='Not used'>";
   for (i = 0; i < asanas.length; i++) {
     if (Found.indexOf(asanas[i].id) == -1) {
-    var S;
-    if (asanas[i].id == SelectedId) {S = " selected "} else {S = ""};
+//    var S;
+//    if (asanas[i].id == SelectedId) {S = " selected "} else {S = ""};
       Rows = Rows + 
         '<option value="' + asanas[i].id + '" ' + S + '>' + 
         asanas[i].name + '</option>';

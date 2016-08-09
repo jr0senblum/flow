@@ -1,9 +1,10 @@
 -module(asana, [Id, 
                 Name::string(),
                 Sanskrit::string(),
+                IsVinyasa::boolean(),
                 Strength::boolean(),
                 Flexibility::boolean(),
-                Ballance::boolean()
+                Balance::boolean()
                ]).
 
 -compile(export_all).

@@ -16,7 +16,7 @@
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xs-4"> 
+        <div class="col-xs-6"> 
           <div class="btn-group-sm" style="float:left">
 	    <button class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-flash" ></em><span id="attS" ></span>
@@ -27,6 +27,9 @@
 	    <button  class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF"></span>
             </button>
+	    <button  class="btn btn-default" type="button">
+	      <em class="glyphicon glyphicon-fire" ></em><span id="attV"></span>
+            </button>
 
           </div>
 
@@ -34,7 +37,7 @@
             <img id="pic" src="" onclick="restore()" heigth="75" width="75" styple="display:inline;"></img>
           </div>
         </div>
-        <div class="col-xs-7">
+        <div class="col-xs-6">
           <div class="btn-group-sm" style="float:left">
 	    <Button id="usebutton" class="btn btn-default" type="button" onclick="selectAsana()">
 	      <em class="glyphicon glyphicon-link" ></em> 
@@ -49,7 +52,7 @@
   	      <a  href="/" id="taskref"><em class="glyphicon glyphicon-list-alt"></em></a>
             </button>
           </div>
-            <div><p id="ename" style="float:right;">Select starting asana</p> </div>
+
           <div>
 
             <select id="tos" data-placeholder="Next..."
@@ -112,6 +115,7 @@ var altOrigPos;
 var nS = 0;
 var nB = 0;
 var nF = 0;
+var nV = 0;
 
 
 function save() {
@@ -378,7 +382,7 @@ function populateAlts(Items, SelectedId) {
 
 
 function recalcAtt() {
-  nS=0; nB=0; nF=0;
+  nS=0; nB=0; nF=0; nV=0;
   flow.forEach(function(Id, i) {
     var Index = indexInAsanas(Id);
     updateAttCount(asanas[Index], true)
@@ -393,22 +397,28 @@ function updateAttCount(Asana, bAdd) {
     offset = -1
   };
 
-  if (Asana.strength) {
+  if (Asana.strength && !Asana.is_vinyasa) {
     nS = nS + offset
   };
-  if (Asana.ballance) {
+  if (Asana.balance && !Asana.is_vinyasa) {
     nB = nB + offset
   };
-  if (Asana.flexibility) {
+  if (Asana.flexibility && !Asana.is_vinyasa) {
     nF = nF + offset
   };
+
+  if (Asana.is_vinyasa) {
+    nV = nV + offset
+  };
+
   setAtt()
 }
 
 function setAtt() {
   $("#attS").text(nS);
   $("#attB").text(nB);
-  $("#attF").text(nF)
+  $("#attF").text(nF);
+  $("#attV").text(nV)
 }
 
 

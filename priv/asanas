@@ -1,10 +1,18 @@
-{"Forward Fold","Uttanasana"}.
+%Either {Name, Sanskirt} or
+%       {Name, Sanskrit, IsVinyasa} or
+%       {Name, Sanskrit, Balance, Flexibility, Strength} or
+%       {Name, Sanskrit, IsVinyasa, Balance, Flexibility, Strength}
+% where Name and Sanskrit are in quotes and
+%       Balance, Flexibility, Strength and IsVinyasa are true or false (no quotes)
+
+{"Forward Fold", "Uttanasana"}.
 {"Firefly", "Tittibhasana"}.
 {"Chair", "Utkatasana"}.
 {"Triangle", "Trikonasana"}.
 {"Mountain", "Tadasana"}.
 {"Standing Side Bend", ""}.
 {"Standing Back Bend", ""}.
+{"Side Down - left", "", true}.
 
 
 

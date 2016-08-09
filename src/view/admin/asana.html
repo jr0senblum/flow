@@ -46,11 +46,14 @@
 	    <button class="btn btn-default" type="button" onclick="toggleAttribute('strength')">
 	      <em id="strength" class="glyphicon glyphicon-ok"></em> Strength
 	    </button>
-	    <button class="btn btn-default" type="button" onclick="toggleAttribute('ballance')">
-	      <em id="ballance" class="glyphicon glyphicon-ok" ></em> Ballance
+	    <button class="btn btn-default" type="button" onclick="toggleAttribute('balance')">
+	      <em id="balance" class="glyphicon glyphicon-ok" ></em> Balance
 	    </button>
 	    <button  class="btn btn-default" type="button" onclick="toggleAttribute('flexibility')">
 	      <em id="flexibility" class="glyphicon glyphicon-ok"></em> Flexibility
+	    </button> 
+	    <button  id="vinyasa" class="btn btn-default" type="button" disabled>
+	      <em class="glyphicon glyphicon-fire"></em>
 	    </button> 
 	  </div>
 	</div>
@@ -320,8 +323,9 @@ function sel(n) {
 function displayAsana() {
   $("#ename").text(asanas[current].name + " - " + asanas[current].sanskrit);
   setAttributeButton($("#strength"), asanas[current].strength); 
-  setAttributeButton($("#ballance"), asanas[current].ballance); 
+  setAttributeButton($("#balance"), asanas[current].balance); 
   setAttributeButton($("#flexibility"), asanas[current].flexibility)
+  if (asanas[current].is_vinyasa) { $("#vinyasa").show()} else {$("#vinyasa").hide()};
   $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
   getDetails();
 }
@@ -337,7 +341,7 @@ function setAttributeButton(control, value) {
 
 
 function toggleAttribute(attribute) {
-  //Toggle strength, Ballance and Flexibility buttons.
+  //Toggle strength, Balance and Flexibility buttons.
   asanas[current][attribute] = ! asanas[current][attribute] ;
   setAttributeButton($("#"+attribute), asanas[current][attribute]); 
   setSaveButton(false);

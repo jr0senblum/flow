@@ -159,14 +159,32 @@ load_asana() ->
     [process(X) || X <- lists:sort(Terms)].
 
 process({Name, Sanskrit}) ->
-    N = string:strip(Name),
-    S = string:strip(Sanskrit),
-    case boss_db:find_first(asana,[{name, equals, N}]) of
+    insert({Name, Sanskrit, false, false, false, false});
+process({Name, Sanskrit, IsVinyasa}) ->
+    insert({Name, Sanskrit, IsVinyasa, false, false, false});
+process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
+    insert({Name, Sanskrit, false, Balance, Flexibility, Strength});
+process({Name, Sanskrit, IsVinyasa, Balance, Flexibility, Strength}) ->
+    insert({Name, Sanskrit, IsVinyasa, Balance, Flexibility, Strength}).
+
+insert({Name, Sanskrit, IsV, B, F, S}) ->
+    Name = string:strip(Name),
+    Sanskrit = string:strip(Sanskrit),
+    case boss_db:find_first(asana,[{name, equals, Name}]) of
         undefined ->
-            A = asana:new(id, N, S, false, false, false),
+            A = boss_record:new(asana, [{name, Name}, 
+                                        {sanskrit, Sanskrit}, 
+                                        {strength, S}, 
+                                        {flexibility, F}, 
+                                        {balance, B},
+                                        {is_vinyasa, IsV}]),
             A:save();
         A ->
-            (A:set([{name,N},{sanskrit,S}])):save()
+            (A:set([{sanskrit, Sanskrit}, 
+                    {strength, S}, 
+                    {flexibility, F}, 
+                    {balance, B},
+                    {is_vinyasa, IsV}])):save()
     end.
 
     

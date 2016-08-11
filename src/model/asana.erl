@@ -1,17 +1,38 @@
 -module(asana, [Id, 
                 Name::string(),
                 Sanskrit::string(),
-                IsVinyasa::boolean(),
-                Strength::boolean(),
+                IsVinyasa ::boolean(),
+                Balance::boolean(),
                 Flexibility::boolean(),
-                Balance::boolean()
+                Strength::boolean(),
+                VType::string()
                ]).
 
 -compile(export_all).
+
 -has({asana_mg, many}).
 -has({asana_range, many}).
 -has({enter_from, many}).
 -has({exit_to, many}).
+
+
+
+validation_tests()->
+    [{fun() -> lists:member(string:to_upper(VType), ["UP","DOWN","SIDE","NONE"]) end,
+      {error, "Vinyasa type must be \"up\", \"down\", \"side\" or \"none\"."}}
+    ].
+
+
+before_create() when IsVinyasa == true ->
+    Modified = set([{balance, false},
+                    {flexibility, false},
+                    {strength, false},
+                    {v_type, string:to_upper(VType)}]),
+    {ok, Modified};
+before_create() ->
+    Modified = set([{v_type, "NONE"}]),
+    {ok, Modified}.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

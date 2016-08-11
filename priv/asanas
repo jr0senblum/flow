@@ -1,9 +1,14 @@
-%Either {Name, Sanskirt} or
-%       {Name, Sanskrit, IsVinyasa} or
-%       {Name, Sanskrit, Balance, Flexibility, Strength} or
-%       {Name, Sanskrit, IsVinyasa, Balance, Flexibility, Strength}
-% where Name and Sanskrit are in quotes and
-%       Balance, Flexibility, Strength and IsVinyasa are true or false (no quotes)
+% Either ASANAS
+%       {Name, Sanskirt} or
+%       {Name, Sanskrit, IsBalance, IsFlexibility, IsStrength} where
+%                                      IsBalance, IsFlexibility, and IsStrength 
+%                                      are always either true or false
+%       VINYASAS
+%       {Name, Sanskrit, VinyasaType} where VinyasaType is one of
+%                                     "up", "down", "side", "none"; or
+%
+% NOTICE: Name and Sanskrit, and VinyasaType are ALWAYS IN QUOTES, 
+% IsBalance, IsFlexibility, and IsStrength are always either true or false
 
 {"Forward Fold", "Uttanasana"}.
 {"Firefly", "Tittibhasana"}.
@@ -12,7 +17,7 @@
 {"Mountain", "Tadasana"}.
 {"Standing Side Bend", ""}.
 {"Standing Back Bend", ""}.
-{"Side Down - left", "", true}.
+{"Side Down", "", "down"}.
 
 
 

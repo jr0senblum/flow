@@ -52,8 +52,11 @@
 	    <button  class="btn btn-default" type="button" onclick="toggleAttribute('flexibility')">
 	      <em id="flexibility" class="glyphicon glyphicon-ok"></em> Flexibility
 	    </button> 
-	    <button  id="vinyasa" class="btn btn-default" type="button" disabled>
-	      <em class="glyphicon glyphicon-fire"></em>
+	    <button   class="btn btn-default" type="button" onclick="toggleVinyasa()">
+	      <em id="is_vinyasa" class="glyphicon glyphicon-ok"></em> Vinyasa
+	    </button> 
+	    <button  id="v_type" class="btn btn-default" type="button" onclick="toggleVType()">
+	      <em id="v_type_em" class="glyphicon glyphicon-certificate"></em>
 	    </button> 
 	  </div>
 	</div>
@@ -325,10 +328,37 @@ function displayAsana() {
   setAttributeButton($("#strength"), asanas[current].strength); 
   setAttributeButton($("#balance"), asanas[current].balance); 
   setAttributeButton($("#flexibility"), asanas[current].flexibility)
-  if (asanas[current].is_vinyasa) { $("#vinyasa").show()} else {$("#vinyasa").hide()};
+  displayVinyasaInfo();
   $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
   getDetails();
 }
+
+function displayVinyasaInfo() {
+  var AnAsana = asanas[current];
+  setAttributeButton($("#is_vinyasa"), AnAsana.is_vinyasa);
+  var control = $("#v_type_em");
+  if (AnAsana.is_vinyasa) { 
+      switch(AnAsana.v_type) { 
+    case "NONE":
+      control.attr('class', "glyphicon glyphicon-certificate");
+      break;
+    case "UP":
+      control.attr('class', "glyphicon glyphicon-arrow-up");
+      break;
+    case "DOWN":
+      control.attr('class', "glyphicon glyphicon-arrow-down");
+      break;
+    case "SIDE":
+      control.attr('class', "glyphicon glyphicon-resize-horizontal");
+      break
+    };
+    $("#v_type").show()
+  } else {
+    control.attr('class', "glyphicon glyphicon-certificate");
+    $("#v_type").hide()
+  }
+};
+
 
 function setAttributeButton(control, value) {
   if (value) {
@@ -339,6 +369,37 @@ function setAttributeButton(control, value) {
     control.addClass("glyphicon-remove")
   }};
 
+
+function toggleVinyasa() {
+  toggleAttribute('is_vinyasa');
+  if (asanas[current].is_vinyasa) {
+    $("#v_type").show()
+  } else {
+    asanas[current].v_type="NONE";
+    $("#v_type").hide()
+  }
+}
+
+function toggleVType() {
+  var NewType = "";
+  switch(asanas[current].v_type) { 
+  case "NONE":
+    NewType = "UP";
+    break;
+  case "UP":
+    NewType = "DOWN";
+    break;
+  case "DOWN":
+    NewType = "SIDE";
+    break;
+  case "SIDE":
+    NewType = "NONE";
+    break
+  };
+  asanas[current].v_type = NewType;
+  displayVinyasaInfo();
+  setSaveButton(false)
+}
 
 function toggleAttribute(attribute) {
   //Toggle strength, Balance and Flexibility buttons.
@@ -357,7 +418,7 @@ function header() {
   $("#details").hide();
 }
 
-function details() {
+  function details() {
   document.getElementById("detailsbutton").setAttribute('onclick','header()');
   $("#detailsem").removeClass("glyphicon-th").addClass("glyphicon-th-large")
   $("#main").hide();
@@ -365,7 +426,6 @@ function details() {
   $("#main2").hide();
   $("#main3").hide();
   $("#details").show();  
-
 }
 
    </script>

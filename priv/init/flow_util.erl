@@ -159,32 +159,32 @@ load_asana() ->
     [process(X) || X <- lists:sort(Terms)].
 
 process({Name, Sanskrit}) ->
-    insert({Name, Sanskrit, false, false, false, false});
-process({Name, Sanskrit, IsVinyasa}) ->
-    insert({Name, Sanskrit, IsVinyasa, false, false, false});
-process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
-    insert({Name, Sanskrit, false, Balance, Flexibility, Strength});
-process({Name, Sanskrit, IsVinyasa, Balance, Flexibility, Strength}) ->
-    insert({Name, Sanskrit, IsVinyasa, Balance, Flexibility, Strength}).
+    insert({Name, Sanskrit, false, false, false, false, "none"});
 
-insert({Name, Sanskrit, IsV, B, F, S}) ->
-    Name = string:strip(Name),
-    Sanskrit = string:strip(Sanskrit),
-    case boss_db:find_first(asana,[{name, equals, Name}]) of
+process({Name, Sanskrit, VinyasaType}) ->
+    insert({Name, Sanskrit, true, false, false, false, VinyasaType});
+
+process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
+    insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none"}).
+
+
+insert({Name, Sanskrit, IsV, B, F, S,VType}) ->
+    Name2 = string:strip(Name),
+    Sanskrit2 = string:strip(Sanskrit),
+    VinyasaType = string:strip(string:to_upper(VType)),
+    PropList = [{sanskrit, Sanskrit2}, 
+                {strength, S}, 
+                {flexibility, F}, 
+                {balance, B},
+                {is_vinyasa, IsV},
+                {v_type, VinyasaType}],
+
+    case boss_db:find_first(asana,[{name, equals, Name2}]) of
         undefined ->
-            A = boss_record:new(asana, [{name, Name}, 
-                                        {sanskrit, Sanskrit}, 
-                                        {strength, S}, 
-                                        {flexibility, F}, 
-                                        {balance, B},
-                                        {is_vinyasa, IsV}]),
+            A = boss_record:new(asana, [{name, Name2} | PropList]), 
             A:save();
         A ->
-            (A:set([{sanskrit, Sanskrit}, 
-                    {strength, S}, 
-                    {flexibility, F}, 
-                    {balance, B},
-                    {is_vinyasa, IsV}])):save()
+            (A:set(PropList)):save()
     end.
 
     

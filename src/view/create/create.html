@@ -28,13 +28,11 @@
 	      <em class="glyphicon glyphicon-menu-down" ></em><span id="attF"></span>
             </button>
 	    <button  class="btn btn-default" type="button">
-	      <em class="glyphicon glyphicon-fire" ></em><span id="attV"></span>
+	      <em id="attVIcon" class="glyphicon glyphicon-fire" ></em><span id="attV"></span>
             </button>
-
           </div>
-
           <div>
-            <img id="pic" src="" onclick="restore()" heigth="75" width="75" styple="display:inline;"></img>
+            <img id="pic" src="" onclick="restore()" heigth="75" width="75"></img>
           </div>
         </div>
         <div class="col-xs-6">
@@ -54,10 +52,10 @@
           </div>
 
           <div>
-
             <select id="tos" data-placeholder="Next..."
                     class="selectpicker "> 
             </select>
+            <p id="ename">Pick a starting asana... <p>
 
           </div>
         </div>
@@ -82,7 +80,7 @@ $(document).ready(function() {
   setAtt();
   buttonModeSave(true);
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#undobutton'), true);
+  setButtonDisabled($('#undobutton'), true)
 })
 
 function buttonModeSave(bValue) {
@@ -115,7 +113,21 @@ var altOrigPos;
 var nS = 0;
 var nB = 0;
 var nF = 0;
-var nV = 0;
+var nDown = 0;
+var nUp = 0;
+var nSide = 0;
+
+function ballance() {
+  if (nDown == nUp && nUp == nSide) {
+    return 'glyphicon-fire'
+  } else if (nDown >= nUp && nDown >= nSide) {
+    return 'glyphicon-arrow-down'
+  }  else if (nUp >= nDown && nUp >= nSide) {
+    return 'glyphicon-arrow-up'
+  }  else 
+    return 'glyphicon-resize-horizontal'
+}
+
 
 
 function save() {
@@ -382,7 +394,7 @@ function populateAlts(Items, SelectedId) {
 
 
 function recalcAtt() {
-  nS=0; nB=0; nF=0; nV=0;
+  nS=0; nB=0; nF=0; nV=0; nUp=0; nDown=0; nSide=0;
   flow.forEach(function(Id, i) {
     var Index = indexInAsanas(Id);
     updateAttCount(asanas[Index], true)
@@ -406,19 +418,34 @@ function updateAttCount(Asana, bAdd) {
   if (Asana.flexibility && !Asana.is_vinyasa) {
     nF = nF + offset
   };
-
-  if (Asana.is_vinyasa) {
-    nV = nV + offset
+  if (Asana.flexibility && !Asana.is_vinyasa) {
+    nF = nF + offset
   };
 
+
+  if (Asana.is_vinyasa) {
+    switch(asanas[current].v_type) {
+    case "NONE":
+      break;
+    case "UP":
+      nUp += offset;
+      break;
+    case "DOWN":
+      nDown += offset;
+      break;
+    case "SIDE":
+      nSide += offset;
+      break;
+      };
+    $("#attVIcon").attr('class', 'glyphicon ' + ballance())
+  };
   setAtt()
 }
 
 function setAtt() {
   $("#attS").text(nS);
   $("#attB").text(nB);
-  $("#attF").text(nF);
-  $("#attV").text(nV)
+  $("#attF").text(nF)
 }
 
 

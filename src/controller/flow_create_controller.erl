@@ -16,10 +16,10 @@ save('POST', [FlowId]) ->
     StructAsanas = mochijson2:decode(JsonAsanas),
 
     Asanas = lists:foldl(fun(A, Acc) -> Acc ++ "," ++ binary_to_list(A) end, binary_to_list(hd(StructAsanas)), tl(StructAsanas)),
-    io:format("it is ~p and ~p~n",[FlowId, Asanas]),
     F = boss_db:find(FlowId),
     G = F:set(asanas, Asanas),
     G:save(),
+    linker:link_flow(StructAsanas),
     {205, "reset content", []}.
 
 % for view/admin/asana.html: return all asanas, update an asana.

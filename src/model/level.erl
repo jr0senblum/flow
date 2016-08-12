@@ -1,2 +1,0 @@
--module(level, [Id, Name::string()]).
--compile(export_all).

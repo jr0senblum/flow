@@ -1,3 +1,9 @@
+%%% ----------------------------------------------------------------------------
+%%% ASANA cover both poses (asanas) and transitions (vinyasas).
+%%% They have english names, sanskirt names, and a boolean indicating whether
+%%% they are a pose or a vinyasa.
+%%% ----------------------------------------------------------------------------
+
 -module(asana, [Id, 
                 Name::string(),
                 Sanskrit::string(),
@@ -10,19 +16,23 @@
 
 -compile(export_all).
 
+
+% Many ranges and muscle groups and they can be entered-from multiple asanas
+% and can exit it multiple asanas.
 -has({asana_mg, many}).
 -has({asana_range, many}).
 -has({enter_from, many}).
 -has({exit_to, many}).
 
 
-
+% Vinyasa types are either the all-caps, strings: up, down, side or none
 validation_tests()->
     [{fun() -> lists:member(string:to_upper(VType), ["UP","DOWN","SIDE","NONE"]) end,
       {error, "Vinyasa type must be \"up\", \"down\", \"side\" or \"none\"."}}
     ].
 
 
+% If Vinyasa, to_upper the vinyasa type; otherwise set it to "NONE".
 before_create() when IsVinyasa == true ->
     Modified = set([{balance, false},
                     {flexibility, false},
@@ -35,45 +45,67 @@ before_create() ->
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Return lists of related objects.
+%% -----------------------------------------------------------------------------
+%% Additional Asana methods
+%% -----------------------------------------------------------------------------
 
+
+% Retrieves a sorted list of muscle group (mg) objects associated with this 
+% asana. Sorts on name.
 muscle_group_objects() ->
-    lists:sort(fun sort_fun/2, [AsanaMg:muscle_group() || AsanaMg <- THIS:asana_mg()]).
+    lists:sort(fun sort_fun/2, 
+               [AsanaMg:muscle_group() || AsanaMg <- THIS:asana_mg()]).
 
+
+% Retrieves a sorted list of range-of-motion (range) records associated with 
+% this asana. Sorts on name.
 range_objects() ->
-    lists:sort(fun sort_fun/2, [AsanaRange:range_of_motion() || AsanaRange <- THIS:asana_range()]).
+    lists:sort(fun sort_fun/2, 
+               [ARange:range_of_motion() || ARange <- THIS:asana_range()]).
 
+
+% Retrieves a sorted list of asana records which enter from this asana. 
+% Sorts on name.
 enters_from() ->
-    lists:sort(fun sort_fun/2, [boss_db:find(EntersFrom:from_asana_id()) || EntersFrom <- THIS:enter_from()]).
+    lists:sort(fun sort_fun/2, 
+               [boss_db:find(EntersFrom:from_asana_id()) 
+                || EntersFrom <- THIS:enter_from()]).
 
+
+% Retrieves a sorted list of asana records which exit to this asana. 
+% Sorts on name.
 exits_to() ->
-    lists:sort(fun sort_fun/2, [boss_db:find(ExitsTo:to_asana_id()) || ExitsTo <- THIS:exit_to()]).
-
+    lists:sort(fun sort_fun/2, 
+               [boss_db:find(ExitsTo:to_asana_id())
+                || ExitsTo <- THIS:exit_to()]).
 
 sort_fun(A, B) ->
     A:name() =< B:name().
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Replace related objects. Assumes that we are given the entire list of
-% related object (i.e., enter_from / exit_to) ids, so always delete first.
-%
 
+% Replace the associated enters_from asanas with those having the supplied list
+% of asana ids.
 replace_enters_from(AsanaList) ->
     delete_enters_from(),
     [(enter_from:new(id, THIS:id(), AsanaId)):save() || AsanaId <- AsanaList],
     ok.
 
+% Replace the associated extes_to asanas with those having the supplied list 
+% of asana ids.
 replace_exits_to(AsanaList) ->
     delete_exits_to(),
     [(exit_to:new(id, THIS:id(), AsanaId)):save() || AsanaId <- AsanaList],
     ok.
 
+% Replace the associated major muscle group records with those having the ids in
+% the supplied list.
 replace_mmgs(MgList) ->
     delete_asana_mmgs(),
     [(asana_mg:new(id, THIS:id(), MgId)):save() || MgId <- MgList],
     ok.
 
+% Replace the associated ranges-of-motion records with those having the ids in
+% the supplied list.
 replace_roms(RangeList) ->
     delete_asana_roms(),
     [(asana_range:new(id, THIS:id(), RangeId)):save() || RangeId <- RangeList],
@@ -81,7 +113,7 @@ replace_roms(RangeList) ->
 
 
 
-
+% delete functions
 delete_enters_from() ->
     _ = [boss_db:delete(Rec:id()) || Rec <- THIS:enter_from()]. 
 

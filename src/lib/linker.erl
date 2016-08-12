@@ -1,11 +1,16 @@
+%%%-----------------------------------------------------------------------------
+%%% Linker is used to process a flow (ordered list of <<"asana ids">>) creating
+%%% new enters_from and exits_to as necessary.
+%%%-----------------------------------------------------------------------------
 -module (linker).
 
 -export([link_flow/1]).
 
 
-% Given a list of asana in order, set the enters_to and exits_from accordingly.
+% Given a list of asana ids in order, set the enters_to and exits_from accordingly.
 link_flow(Flow) ->
     link_asana(Flow).
+
 
 % Step through each pair of asana, updating exit_to.
 link_asana([]) ->
@@ -13,12 +18,10 @@ link_asana([]) ->
 link_asana([_A|[]]) ->
     ok;
 link_asana([A, B|Tl]) ->
-    io:format("A and B ~p ~p~n",[A, B]),
     AsanaA = boss_db:find(binary_to_list(A)),
     AsanaB = boss_db:find(binary_to_list(B)),
     update_exit_to(AsanaA, AsanaB),
     link_asana([B|Tl]).
-
 
 
 % If A already exits to B, do nothing; otherwise create the correct exit_to and

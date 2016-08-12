@@ -84,17 +84,19 @@ sort_fun(A, B) ->
 
 
 % Replace the associated enters_from asanas with those having the supplied list
-% of asana ids.
+% of asana ids. Create the corresponding exit_to entities.
 replace_enters_from(AsanaList) ->
     delete_enters_from(),
     [(enter_from:new(id, THIS:id(), AsanaId)):save() || AsanaId <- AsanaList],
+    [(exit_to:new(id, AsanaId, THIS:id())):save() || AsanaId <- AsanaList],
     ok.
 
-% Replace the associated extes_to asanas with those having the supplied list 
-% of asana ids.
+% Replace the associated exit_to asanas with those having the supplied list 
+% of asana ids. Create the corresponding enter_from entities.
 replace_exits_to(AsanaList) ->
     delete_exits_to(),
     [(exit_to:new(id, THIS:id(), AsanaId)):save() || AsanaId <- AsanaList],
+    [(enter_from:new(id, AsanaId, THIS:id())):save() || AsanaId <- AsanaList],
     ok.
 
 % Replace the associated major muscle group records with those having the ids in
@@ -115,10 +117,10 @@ replace_roms(RangeList) ->
 
 % delete functions
 delete_enters_from() ->
-    _ = [boss_db:delete(Rec:id()) || Rec <- THIS:enter_from()]. 
+    _ = [delete_enters_from(EnterFrom) || EnterFrom <- THIS:enter_from()]. 
 
 delete_exits_to() ->
-    _ = [boss_db:delete(Rec:id()) || Rec <- THIS:exit_to()]. 
+    _ = [delete_exits_to(ExitTo) || ExitTo <- THIS:exit_to()]. 
 
 delete_asana_mmgs() ->
     _ = [boss_db:delete(Rec:id()) || Rec <- THIS:asana_mg()]. 
@@ -127,4 +129,29 @@ delete_asana_roms() ->
     _ = [boss_db:delete(Rec:id()) || Rec <- THIS:asana_range()]. 
 
 
-                
+% Delete the enter_from entitity and the corresponding exit_to entity.         
+delete_enters_from(AnEnterFrom) ->       
+    FromId = AnEnterFrom:from_asana_id(),
+    boss_db:delete(AnEnterFrom:id()),
+    case boss_db:find(exit_to,[{to_asana_id, equals, THIS:id()},
+                               {asana_id, equals, FromId}]) of
+        [] ->
+            ok;
+        [ExitTo] ->
+            boss_db:delete(ExitTo:id())
+    end.
+
+% Delete the exit_to entitity and the corresponding enter_from entity.         
+delete_exits_to(AnExitTo) ->       
+    ToId = AnExitTo:to_asana_id(),
+    boss_db:delete(AnExitTo:id()),
+    case boss_db:find(enter_from,[{from_asana_id, equals, THIS:id()},
+                               {asana_id, equals, ToId}]) of
+        [] ->
+            ok;
+        [EnterFrom] ->
+            boss_db:delete(EnterFrom:id())
+    end.
+    
+    
+    

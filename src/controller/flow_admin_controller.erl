@@ -1,25 +1,35 @@
+%%%-----------------------------------------------------------------------------
+%%% Controller used for admin /admin urls
+%%%-----------------------------------------------------------------------------
+
 -module(flow_admin_controller, [Req]).
 -compile(export_all).
 
 
-% for view/admin/asana.html: return all asanas, update an asana.
+% admin/asana GET return nothing to asana.html
 asana('GET', []) ->
     {ok, []};
+
+%admin/asana/all GET all asanas
 asana('GET', ["all"]) ->
     Asanas = boss_db:find(asana, [], [{order_by, name}]),
     {json, [{asanas, Asanas}]};
+
+%admin/asana/update POST update the given asana.
 asana('POST', ["update"]) ->
     UpdatedAsana = update_asana(Req:post_param(<<"new_asana">>)),
+
     update_froms(UpdatedAsana, Req:post_param(<<"from_asanas">>)),
     update_tos(UpdatedAsana, Req:post_param(<<"to_asanas">>)),
-    link_from(UpdatedAsana, Req:post_param(<<"to_asanas">>)),
-    link_to(UpdatedAsana, Req:post_param(<<"from_asanas">>)),
-    remove_inconsistant(UpdatedAsana:id()),
+
     update_mmgs(UpdatedAsana, Req:post_param(<<"mmgs">>)),
     update_roms(UpdatedAsana, Req:post_param(<<"roms">>)),
     {205, "reset content", []}.
 
-% return the associated objects of a given asana
+% admin/related/asanaId return the associated entities of a given asana. Also 
+% return all of the muscle_grou and range_of_motions. These are not related
+% to the AsanaId, per se, but they might have changed via another screen
+% so it's good to get the latest.
 related('GET', [AsanaId]) ->
     Asana = boss_db:find(AsanaId),
     Mg = Asana:muscle_group_objects(),
@@ -36,12 +46,14 @@ related('GET', [AsanaId]) ->
             {exits, Exits}]}.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Helper functions
 
-% Parse the JSON description of the passed-in asana and update the persisted
-% version. JSON -> ASANA
-%
+%%------------------------------------------------------------------------------
+%% Helper functions
+%%------------------------------------------------------------------------------
+
+
+% Given a JSON representation of the asana record, update the persisted version.
+% json_to_plist returns [{prop, value}...] which is what the set/1 takes.
 update_asana(JSON) ->
     PList = json_to_plist(JSON),
     Id = proplists:get_value(id, PList),
@@ -50,83 +62,38 @@ update_asana(JSON) ->
     {ok, New} = New:save(),
     New.
 
-% Remove all enter_froms and exit_tos and then insert the ones indicated for
-% the given Asana.
+
+% Given a JSON representation of enter_from records to be set for the given
+% asana, do so.
 update_froms(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_enters_from(PList).
 
+
+% Given a JSON representation of exit_to records to be set for the given
+% asana, do so.
 update_tos(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_exits_to(PList).
 
-% Create an enter_from for each Exit To added to the asana.
-link_from(UpdatedAsana, JSONTos) ->
-    PList = json_to_plist(JSONTos),
-    _= [add_new_enter_from(Id, UpdatedAsana:id()) || Id <- PList].
 
-% Create an exit_to for each Enter From added to the asana.
-link_to(UpdatedAsana, JSONEnters) ->
-    PList = json_to_plist(JSONEnters),
-    _= [add_new_exit_to(Id, UpdatedAsana:id()) || Id <- PList].
-
-
-% Removing an Enter or Exit from an asana should remove the removed things
-% corresponding Exit or Enter.
-remove_inconsistant(UpdatedAsanaId) ->
-    UpdatedAsana = boss_db:find(UpdatedAsanaId),
-
-    Candidates = boss_db:find(exit_to,[{to_asana_id, equals, UpdatedAsana:id()}],[]),
-    Valid = [From:from_asana_id() || From <- UpdatedAsana:enter_from()],
-    Filter = fun(Candidate) -> not lists:member(Candidate:asana_id(), Valid) end,
-    _ = [boss_db:delete(Looser:id()) || Looser <- lists:filter(Filter, Candidates)],
-
-    Candidates2 = boss_db:find(enter_from,[{from_asana_id, equals, UpdatedAsana:id()}],[]),
-    Valid2 = [To:to_asana_id() || To <- UpdatedAsana:exit_to()],
-    Filter2 = fun(Candidate) -> not lists:member(Candidate:asana_id(), Valid2) end,
-    _ = [boss_db:delete(Looser:id()) || Looser <- lists:filter(Filter2, Candidates2)].
-
-
+% Given a JSON representation of major muscle group records to be set for the 
+% given asana, do so.
 update_mmgs(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_mmgs(PList).
 
+% Given a JSON representation of ranges of motion records to be set for the 
+% given asana, do so.
 update_roms(UpdatedAsana, JSON) ->
     PList = json_to_plist(JSON),
     UpdatedAsana:replace_roms(PList).
 
 
 
-add_new_enter_from(SourceId, FromId) ->
-    case boss_db:find(enter_from, 
-                      [{from_asana_id, equals, FromId},
-                       {asana_id, equals, SourceId}],
-                      []) of
-        [] ->
-            (enter_from:new(id, SourceId, FromId)):save();
-        _ ->
-            ok
-    end.
-
-add_new_exit_to(SourceId, ToId) ->
-    case boss_db:find(exit_to, 
-                      [{to_asana_id, equals, ToId},
-                       {asana_id, equals, SourceId}],
-                      []) of
-        [] ->
-            (exit_to:new(id, SourceId, ToId)):save();
-        _ ->
-            ok
-    end.
-
-
-
-
-
-
-% Converts a JSON string to property lists with binary-string properties converted 
-% to atoms and, for values, strings (to match Boss' enetiry record structure)
-%.
+% Converts a JSON string to property lists with binary-string properties 
+% converted to atoms and, for values, strings (to match Boss' entity record 
+% structure).
 json_to_plist(JSON) ->
     PList = jsx:decode(JSON),
     F = fun({K,V}) when is_binary(V) -> {binary_to_atom(K, utf8), binary_to_list(V)};

@@ -1,5 +1,10 @@
+%%%-----------------------------------------------------------------------------
+%%% Controller used for creating a flow /create urls
+%%%-----------------------------------------------------------------------------
+
 -module(flow_create_controller, [Req]).
 -compile(export_all).
+
 
 
 create('GET', []) ->
@@ -12,14 +17,14 @@ create('GET', [FlowId]) ->
           {name, Flow:name()}]}.
 
 save('POST', [FlowId]) ->
-    JsonAsanas = Req:post_param(<<"updated_flow">>),
-    StructAsanas = mochijson2:decode(JsonAsanas),
+    JsonIds = Req:post_param(<<"updated_flow">>),
+    IdsList = json_to_plist(JsonIds),
+    IdsString = string:join(IdsList, ","),
 
-    Asanas = lists:foldl(fun(A, Acc) -> Acc ++ "," ++ binary_to_list(A) end, binary_to_list(hd(StructAsanas)), tl(StructAsanas)),
     F = boss_db:find(FlowId),
-    G = F:set(asanas, Asanas),
+    G = F:set(asanas, IdsString),
     G:save(),
-    linker:link_flow(StructAsanas),
+    linker:link_flow(IdsList),
     {205, "reset content", []}.
 
 % for view/admin/asana.html: return all asanas, update an asana.
@@ -30,25 +35,18 @@ asana('GET', ["all"]) ->
     {json, [{asanas, Asanas}]}.
 
 
-% return the associated objects of a given asana
-related('GET', [AsanaId]) ->
+% return the associated exits of a given asana.
+exits('GET', [AsanaId]) ->
     Asana = boss_db:find(AsanaId),
-    Mg = Asana:muscle_group_objects(),
-    Rom = Asana:range_objects(),
-    Enters = Asana:enters_from(),
     Exits =  Asana:exits_to(),
-    AllMg = boss_db:find(muscle_group, [], [{order_by, name}]),
-    AllRom = boss_db:find(range_of_motion,[], [{order_by, name}]),
-    {json, [{mg, Mg},
-            {allmg, AllMg},
-            {rom, Rom},
-            {allrom, AllRom},
-            {enters, Enters},
-            {exits, Exits}]}.
+    {json, [{exits, Exits}]}.
 
+
+% Given ALeft ARight and A, what Asana have gone from ALeft to ARight.
 replacements('GET', [AsanaIdLeft, AsanaIdRight]) when AsanaIdLeft == "undefined"->
     Works = (boss_db:find(AsanaIdRight)):enters_from(),
     {json, [{replacements, Works}]};
+
 replacements('GET', [AsanaIdLeft, AsanaIdRight]) when AsanaIdRight == "undefined"->
     Works = (boss_db:find(AsanaIdLeft)):exits_to(),
     {json, [{replacements, Works}]};
@@ -58,20 +56,19 @@ replacements('GET', [AsanaIdLeft, AsanaIdRight]) ->
     AsanaRightEnters = sets:from_list((boss_db:find(AsanaIdRight)):enters_from()),
     Works = 
         sets:to_list(sets:intersection(AsanaLeftExits, AsanaRightEnters)),
-    
     {json, [{replacements, Works}]}.
 
 
 
 
+%%------------------------------------------------------------------------------
+%% Helper functions
+%%------------------------------------------------------------------------------
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Helper functions
+% Parse the JSON into a PLIST suitible for using as the parameter to various 
+% update fns.
 
-% Parse the JSON description of the passed-in asana and update the persisted
-% version. JSON -> ASANA
-%
 update_asana(JSON) ->
     PList = json_to_plist(JSON),
     Id = proplists:get_value(id, PList),
@@ -98,9 +95,9 @@ update_roms(UpdatedAsana, JSON) ->
 
 
 
-% Converts a JSON string to property lists with binary-string properties converted 
-% to atoms and, for values, strings (to match Boss' enetiry record structure)
-%.
+% Converts a JSON string to property lists with binary-string properties 
+% converted to atoms and, for values, strings (to match Boss' enetity record
+% structure).
 json_to_plist(JSON) ->
     PList = jsx:decode(JSON),
     F = fun({K,V}) when is_binary(V) -> {binary_to_atom(K, utf8), binary_to_list(V)};

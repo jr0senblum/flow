@@ -216,7 +216,7 @@ function displayAsanaName() {
 
 // Fetch Asana previously selected after the current one.
 function getRelatedAsana() {
-  $.ajax("/create/related/" + asanas[current].id,
+  $.ajax("/create/exits/" + asanas[current].id,
          { cache: false,
            success: function(data, code, xhr) {
              populateChoices(data.exits)

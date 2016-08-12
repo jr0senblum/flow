@@ -18,8 +18,8 @@ link_asana([]) ->
 link_asana([_A|[]]) ->
     ok;
 link_asana([A, B|Tl]) ->
-    AsanaA = boss_db:find(binary_to_list(A)),
-    AsanaB = boss_db:find(binary_to_list(B)),
+    AsanaA = boss_db:find(A),
+    AsanaB = boss_db:find(B),
     update_exit_to(AsanaA, AsanaB),
     link_asana([B|Tl]).
 
@@ -48,6 +48,7 @@ exists(A, exits_to, B) ->
 create (A, exits_to, B) ->
     New = boss_record:new(exit_to, [{asana_id, A:id()}, {to_asana_id, B:id()}]),
     New:save();
+
 create(A, enters_from, B) ->
     New = boss_record:new(enter_from, [{asana_id, B:id()}, 
                                        {from_asana_id, A:id()}]),

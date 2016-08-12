@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{flow_name}}</title>
+    <meta name="description" content="Print page for flow application">
+    <meta name="author" content="Jim Rosenblum">
+
+    <link href="/static/css/print.css" rel="stylesheet">
+  </head>
+  
+  <body>
+
+  <div id="start" class="container">
+  </div> 
+
+  <script src="/static/js/jquery.min.js"></script>
+  <script>
+
+$(document).ready(
+  function() {
+    loadFlow('{{flow_id}}')
+  }
+)
+
+// Load all asanas, load flow being edited (if one), set initial current state.
+function loadFlow(flow_id) {
+  $.ajax("/print/details/" + flow_id,
+         { cache: false,
+           success: function(data, code, xhr) {
+             items(data.asana_names, data.img_strings);
+           }});
+  
+}
+
+function items(names, images) {
+  var Row = "";
+  for (i=0;i<names.length;i++) {
+    Row = Row + 
+      '<div class="float"> <img src="' + images[i] + '"' + ' width="90" height="160" /><br /> <p>' + names[i] + '</p></div>' 
+  };
+  $("#start").append(Row);
+}
+
+</script>
+  </body>
+  </html>

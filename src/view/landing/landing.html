@@ -46,7 +46,7 @@
               <button id="deletebutton" type="button" class="btn btn-default">
 	        <em class="glyphicon glyphicon-remove"></em> Delete
 	      </button>
-	    <button class="btn btn-default" type="button">
+	    <button id="printbutton" class="btn btn-default" type="button">
 	      <em class="glyphicon glyphicon-print"></em> Print
 	    </button>
 	    <button class="btn btn-default" type="button">
@@ -149,6 +149,7 @@ function showfield(id, name, desc) {
   $("#name").val(name);
   $("#desc").val(desc);
   $("#gobutton").attr('disabled', false).attr('onclick', "location.href='/create/create/" + id + "'");
+  $("#printbutton").attr('disabled', false).attr('onclick', "location.href='/print/print/" + id + "'");
   $("#editbutton").attr('disabled', false).attr('onclick', "editFlow('" + id + "','" + name + "','"+desc+"')");
   $("#submitbutton").attr('onclick', "update('" + id + "')")
   $("#deletebutton").attr('disabled', false).attr('onclick', "del('" + id + "')")

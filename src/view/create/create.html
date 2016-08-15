@@ -51,12 +51,20 @@
 	    <button id="printbutton" class="btn btn-default" type="button" onclick="location.href='/print/print/{{id}}'">
 	      <em class="glyphicon glyphicon-print"></em>
 	    </button>
+	    <button id="reset" class="btn btn-default" type="button" onclick="reset()">
+	      <em  class="glyphicon glyphicon-refresh" ></em> 
+	    </button>
           </div>
 
           <div>
             <select id="tos" data-placeholder="Next..."
                     class="selectpicker "> 
             </select>
+            <div class="checkbox">
+	      <label>
+		<input type="checkbox" id="autoadd"/> Add Vinyasa X
+	      </label>
+	    </div> 
             <p id="ename">Pick a starting asana... <p>
 
           </div>
@@ -78,13 +86,21 @@
 
 
 $(document).ready(function() {
+  reset();
+});
+
+
+
+function reset() {
+  $("#flowthusfar ul").empty();
   loadAllAsana(0);
   setAtt();
   buttonModeSave(true);
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
   setButtonDisabled($('#printbutton'), false)
-})
+}
+
 
 function buttonModeSave(bValue) {
     setButtonDisabled($("#savebutton"), bValue);
@@ -119,6 +135,7 @@ var nF = 0;
 var nDown = 0;
 var nUp = 0;
 var nSide = 0;
+var G_VinyasaX = "{{vinyasax}}";
 
 function ballance() {
   if (nDown == nUp && nUp == nSide) {
@@ -148,7 +165,7 @@ function loadAllAsana(index) {
              asanas = data.asanas;
              current = -1;
              populateChoices(data.asanas);
-             load_flow() 
+             load_flow()
            }});
 
 }
@@ -184,17 +201,23 @@ function populateChoices(choices) {
 
 // If this page is loaded with pre-exiting flow information, use it.
 function load_flow() {
-  {% if flow %}
-   {% for f in flow %}
-    load_asana_from_flow('{{f}}');
-   {% endfor %}
+  $.ajax("/create/flow/{{id}}",
+         { cache: false,
+           success: function(data, code, xhr) {
+             load_flow_asanas(data.flow);
+           }});
+}
+
+function load_flow_asanas(FlowAsanaIds) {
+  for (i=0;i<FlowAsanaIds.length;i++) {
+    load_asana_from_flow(FlowAsanaIds[i])
+  };
   displayAsanaName();
   getRelatedAsana();
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
   setButtonDisabled($('#printbutton'), false);
   scrollToEnd();
-  {% endif %}
 }
 
 function load_asana_from_flow(asana_id) {
@@ -266,6 +289,20 @@ function use() {
       '<img src="/static/stickfigures/' + Head.name.toLowerCase() + '.jpg" ' + 
       'onclick="backUp(' + Id + ')"></li>';  
   $("#flowthusfar ul").append(Row);
+
+  if ($("#autoadd")[0].checked) {
+    current = indexInAsanas(G_VinyasaX);
+    updateAttCount(asanas[current],true);
+    displayAsanaName();
+    getRelatedAsana();
+    flow.push(G_VinyasaX);
+    Head = asanas[current];
+    Id = (flow.length - 1).toString();
+    Row = '<li id="' + Id + '">' +
+      '<img src="/static/stickfigures/' + Head.name.toLowerCase() + '.jpg" ' + 
+      'onclick="backUp(' + Id + ')"></li>';  
+    $("#flowthusfar ul").append(Row)
+  };
 
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#printbutton'), true);

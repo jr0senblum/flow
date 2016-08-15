@@ -7,14 +7,15 @@
 
 
 
-create('GET', []) ->
-    {ok, []};
 create('GET', [FlowId]) ->
+    [VinyasaX] = boss_db:find(asana, [{name, equals, "Vinyasa x"}]),
+    {ok, [{id, FlowId},
+          {vinyasax, VinyasaX:id()}]}.
+
+flow('GET', [FlowId]) ->
     [Flow] = boss_db:find(flow, [id, equals, FlowId]),
-    Asanas = [string:strip(A) || A <- string:tokens(Flow:asanas(), ",")],
-    {ok, [{flow, Asanas},
-          {id, FlowId},
-          {name, Flow:name()}]}.
+    Asanas = [list_to_binary(string:strip(A)) || A <- string:tokens(Flow:asanas(), ",")],
+    {json, [{flow, Asanas}]}.
 
 save('POST', [FlowId]) ->
     JsonIds = Req:post_param(<<"updated_flow">>),

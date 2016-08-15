@@ -60,11 +60,6 @@
             <select id="tos" data-placeholder="Next..."
                     class="selectpicker "> 
             </select>
-            <div class="checkbox">
-	      <label>
-		<input type="checkbox" id="autoadd"/> Add Vinyasa X
-	      </label>
-	    </div> 
             <p id="ename">Pick a starting asana... <p>
 
           </div>
@@ -135,7 +130,7 @@ var nF = 0;
 var nDown = 0;
 var nUp = 0;
 var nSide = 0;
-var G_VinyasaX = "{{vinyasax}}";
+//var G_VinyasaX = "{{vinyasax}}";
 
 function ballance() {
   if (nDown == nUp && nUp == nSide) {
@@ -290,19 +285,25 @@ function use() {
       'onclick="backUp(' + Id + ')"></li>';  
   $("#flowthusfar ul").append(Row);
 
-  if ($("#autoadd")[0].checked) {
-    current = indexInAsanas(G_VinyasaX);
-    updateAttCount(asanas[current],true);
-    displayAsanaName();
-    getRelatedAsana();
-    flow.push(G_VinyasaX);
-    Head = asanas[current];
-    Id = (flow.length - 1).toString();
-    Row = '<li id="' + Id + '">' +
-      '<img src="/static/stickfigures/' + Head.name.toLowerCase() + '.jpg" ' + 
-      'onclick="backUp(' + Id + ')"></li>';  
-    $("#flowthusfar ul").append(Row)
-  };
+//  if ($("#autoadd")[0].checked) {
+//    current = indexInAsanas(G_VinyasaX);
+//    updateAttCount(asanas[current],true);
+//    displayAsanaName();
+//    getRelatedAsana();
+//    flow.push(G_VinyasaX);
+//    Head = asanas[current];
+//    Id = (flow.length - 1).toString();
+//    Row = '<li id="' + Id + '">' +
+//      '<img src="/static/stickfigures/' + Head.name.toLowerCase() + '.jpg" ' + 
+//      'onclick="backUp(' + Id + ')"></li>';  
+//    $("#flowthusfar ul").append(Row)
+//  };
+//            <div class="checkbox">
+//	      <label>
+//		<input type="checkbox" id="autoadd"/> Add Vinyasa X
+//	      </label>
+//	    </div> 
+
 
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#printbutton'), true);

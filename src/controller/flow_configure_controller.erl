@@ -1,21 +1,21 @@
 %%%-----------------------------------------------------------------------------
-%%% Controller used for admin /admin urls
+%%% Controller used for configure /configure urls
 %%%-----------------------------------------------------------------------------
 
--module(flow_admin_controller, [Req]).
+-module(flow_configure_controller, [Req]).
 -compile(export_all).
 
 
-% admin/asana GET return nothing to asana.html
+% configure/asana GET return nothing to asana.html
 asana('GET', []) ->
     {ok, []};
 
-%admin/asana/all GET all asanas
+%configure/asana/all GET all asanas
 asana('GET', ["all"]) ->
     Asanas = boss_db:find(asana, [], [{order_by, name}]),
     {json, [{asanas, Asanas}]};
 
-%admin/asana/update POST update the given asana.
+%configure/asana/update POST update the given asana.
 asana('POST', ["update"]) ->
     UpdatedAsana = update_asana(Req:post_param(<<"new_asana">>)),
 
@@ -26,7 +26,7 @@ asana('POST', ["update"]) ->
     update_roms(UpdatedAsana, Req:post_param(<<"roms">>)),
     {205, "reset content", []}.
 
-% admin/related/asanaId return the associated entities of a given asana. Also 
+% configure/related/asanaId return the associated entities of a given asana. Also 
 % return all of the muscle_grou and range_of_motions. These are not related
 % to the AsanaId, per se, but they might have changed via another screen
 % so it's good to get the latest.

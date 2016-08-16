@@ -6,13 +6,16 @@
 -compile(export_all).
 
 
+before_(_) ->
+    user_lib:require_login(Req).
+
 
 % /landing/landing
-landing('GET', []) ->
+landing('GET', [], _FlowUser) ->
     {ok, []}.
 
 % /landing/flow GET JSON to the requester consisting of all flows.
-flows('GET', []) ->
+flows('GET', [], _FlowUser) ->
     Flows = boss_db:find(flow,[],[{order_by,name}]),
     {json, [{flows, Flows}]}.
 

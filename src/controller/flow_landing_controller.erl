@@ -2,7 +2,7 @@
 %%% Controller handling /landing urls
 %%%-----------------------------------------------------------------------------
 
--module(flow_landing_controller, [Req]).
+-module(flow_landing_controller, [Req, SessionID]).
 -compile(export_all).
 
 

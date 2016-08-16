@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Configure Asina</title>
+    
+    <meta name="description" content="Flow">
+    <meta name="author" content="Jim Rosenblum">
+    
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <link href="/static/css/chosen.min.css" rel="stylesheet">
+  </head>
+  
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+	<div class="col-md-4">
+          <div id="main1" class="btn-group btn-group-sm">
+	    <button class="btn btn-default" type="button" onclick="toggleAttribute('strength')">
+	      <em id="strength" class="glyphicon glyphicon-ok"></em> Strength
+	    </button>
+	    <button class="btn btn-default" type="button" onclick="toggleAttribute('balance')">
+	      <em id="balance" class="glyphicon glyphicon-ok" ></em> Balance
+	    </button>
+	    <button  class="btn btn-default" type="button" onclick="toggleAttribute('flexibility')">
+	      <em id="flexibility" class="glyphicon glyphicon-ok"></em> Flexibility
+	    </button> 
+	    <button   class="btn btn-default" type="button" onclick="toggleVinyasa()">
+	      <em id="is_vinyasa" class="glyphicon glyphicon-ok"></em> Vinyasa
+	    </button> 
+	    <button  id="v_type" class="btn btn-default" type="button" onclick="toggleVType()">
+	      <em id="v_type_em" class="glyphicon glyphicon-certificate"></em>
+	    </button> 
+	  </div>
+          <div id="main"> <img id="pic"  alt="Asana Picture" src={{ path }}></div>
+	  <p id="ename" class="text-left text-success"> </p>           
+	  <div class="btn-group">
+	    <button id="left" class="btn btn-default" type="button" onclick="previous()">
+	      <em class="glyphicon glyphicon-chevron-left" ></em> 
+	    </button>
+	    <button id="right" class="btn btn-default" type="button" onclick="next()">
+	      <em  class="glyphicon glyphicon-chevron-right" ></em>
+	    </button>
+	    <button  id="savebutton" class="btn btn-default" type="button" onclick="saveCurrent()">
+	      <em  id="save" class="glyphicon glyphicon-saved" ></em>
+	    </button>
+	    <button id="reset" class="btn btn-default" type="button" onclick="reset()">
+	      <em  class="glyphicon glyphicon-refresh" ></em> 
+	    </button>
+	    <button  id="detailsbutton" class="btn btn-default" type="button" onclick="details()">
+	      <em id="detailsem" class="glyphicon glyphicon-th" ></em>
+	    </button>
+	    <button id="landingbutton" class="btn btn-default" type="button">
+	      <a id="landingref" href="/"><em class="glyphicon glyphicon-tasks" ></em></a>
+	    </button>
+	  </div>
+          
+
+
+	</div>
+        <div id="main2" class="col-md-8">
+	  <div style="float:left">
+            <p class="text-left text-info">Enters from...</p>
+            <select id="froms" data-placeholder="Choose asanas..." style="width:250px;"
+                    multiple class="chosen-select">
+            </select>
+          </div>
+          <div id="main3"style="float:left">
+	    <p class="text-left text-info"> Exits to...</p>
+            <select id="tos" data-placeholder="Choose asanas..." style="width:250px;" 
+                    multiple class="chosen"> 
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="details" class="row">
+        <div class="col-md-6">
+          <table id="mg" class="table table-condensed table-striped tableSection">
+	    <thead>
+	      <tr>
+	        <th>
+		  Major Muscle Groups
+	        </th>
+	      </tr>
+	    </thead>
+	    <tbody> 
+	    </tbody> 
+	  </table>
+        </div>
+        <div class="col-md-6">
+	  <table id="rom" class="table table-condensed table-striped tableSection">
+	    <thead>
+	      <tr>
+	        <th>
+		  Joints and Ranges
+	        </th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+        </div>
+      </div>
+    </div>
+
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/chosen.jquery.min.js"></script>
+
+  <script>
+
+  $(document).ready(function() {
+    loadAllAsana(0);
+    setSaveButton(true);
+    header();
+  });
+
+
+// Attach the Chosen jquery plug-in to the select-boxes.
+$("#tos").chosen().change(function() {
+     setSaveButton(false)
+  })
+
+$("#froms").chosen().change(function() {
+     setSaveButton(false)
+  })
+
+
+// Asanas is the array of all asanas, current is the index of the current one.
+var asanas = new Array();
+var current = 0;
+
+
+// Reload the asana from the server and redisplay the current asana.
+function reset() {
+  loadAllAsana(current)
+}
+
+
+// Load all asana and set the current asana to be the index.
+function loadAllAsana(index) {
+  $.ajax("/configure/asana/all",
+         { cache: false,
+           success: function(data, code, xhr) {
+             asanas = data.asanas;
+             current = index;
+             setSaveButton(true);
+             displayAsana()
+           }})
+}
+
+
+// Get related objects to the current asana.
+function getDetails() {
+  $.ajax("/configure/related/" + asanas[current].id,
+         { cache: false,
+           success: function(data, code, xhr) {
+             populateAnatomy(data.mg, data.allmg, '#mg');
+             populateAnatomy(data.rom, data.allrom, '#rom');
+             populateEntersAndExits(data.enters, $('#froms'));
+             populateEntersAndExits(data.exits, $('#tos'))
+         }})}
+
+
+// Populate either range of motion or musclegroup tables.
+function populateAnatomy(groups, all, accessor) {
+  var Rows = "";
+  var Found = new Array();
+  $(accessor + ' tbody').empty()
+  for (i = 0; i < groups.length; i++) {
+    Found.push(groups[i].id);
+    Rows = Rows + 
+      "<tr class='success' onclick='sel(this)'>" +
+      "<td value='"+groups[i].id+"'>" + groups[i].name + " </td></tr>";
+  };
+  for (i = 0; i < all.length; i++) {
+    if (Found.indexOf(all[i].id) == -1 ) {
+      Rows = Rows + 
+      "<tr class='active' onclick='sel(this)';>" +
+      "<td value='"+all[i].id+"'>" + all[i].name + " </td></tr>";
+    }
+  }
+  $(accessor + ' > tbody:last-child').append(Rows)
+}
+
+
+// Populate either entering or exiting asana select boxes.
+function populateEntersAndExits(enters, control) {
+  var Rows = "";
+  var Found = new Array();
+  
+  for (i = 0; i < enters.length; i++) {
+    Rows = Rows + 
+      '<option value="' + enters[i].id + '" selected>' + 
+      enters[i].name + '</option>';
+    Found.push(enters[i].id);
+  };
+  control.html(Rows);
+
+  Rows = "";
+  for (i = 0; i < asanas.length; i++) {
+    if (Found.indexOf(asanas[i].id) == -1 && i != current) {
+      Rows = Rows + 
+        '<option value="' + asanas[i].id + '">' + 
+        asanas[i].name + '</option>';
+    }
+  }
+  control.append(Rows);
+  control.trigger("chosen:updated")
+}
+
+
+
+// Button State Management
+//
+
+function setSaveButton(state) {
+  // change icon and text from save to saved and back again.
+  // state = true indicates that everything has been saved.
+  if (state == true) {
+    $("#save").removeClass("glyphicon-save").addClass("glyphicon-saved")
+  } else {
+    $("#save").removeClass("glyphicon-saved").addClass("glyphicon-save");
+  };
+  $("#savebutton").prop("disabled", state);
+
+  $("#landingbutton").prop("disabled", !state);
+  if (state) {
+      $("#landingref").prop('href', "/")
+    } else {
+      $("#landingref").prop('href', "#")
+    };
+  setNextPrevStatus()
+}
+
+
+function notAllSaved() {
+  return $("#save").hasClass("glyphicon-save")
+}
+
+
+function setNextPrevStatus() {
+  var all_saved = notAllSaved();
+  toggleButtonStatus($('#right'), ((current == asanas.length - 1) || all_saved));
+  toggleButtonStatus($('#left'), ((current == 0) || all_saved));
+  toggleButtonStatus($("#search"), all_saved);
+  toggleButtonStatus($("#clear"), all_saved)
+}
+
+
+function toggleButtonStatus(a_button, state) {
+  a_button.prop("disabled", state)
+}
+
+
+function next() {
+  if (current < asanas.length - 1) {
+    current = current + 1;
+    displayAsana();
+  };
+  setNextPrevStatus()
+}
+
+function previous() {
+  if (current > 0) {
+    current = current - 1;
+    displayAsana();
+  };
+  setNextPrevStatus()
+}
+
+
+
+// Saving changes to an asana.
+function saveCurrent() {
+  var fs = collectTransitions($("#froms option"));
+  var es = collectTransitions($("#tos option"));
+  var mmg = collectAnatomy($("#mg tbody .success td"));
+  var rom = collectAnatomy($("#rom tbody .success td"));
+
+  $.post("/configure/asana/update",
+         {new_asana:JSON.stringify(asanas[current]),
+          from_asanas:JSON.stringify(fs),
+          to_asanas:JSON.stringify(es),
+          mmgs:JSON.stringify(mmg),
+          roms:JSON.stringify(rom)},
+         function(data,status) { });
+  setSaveButton(true)
+}
+
+function collectTransitions(select) {
+  var selected=[];
+  for (var i = 0; i < select.length; i++) {
+    if (select[i].selected) selected.push(select[i].value);
+  }
+  return (selected)
+}
+
+function collectAnatomy(rows) {
+  var selected=[];
+  for (var i = 0; i < rows.length; i++) {
+    selected.push(rows[i].getAttribute("value"));
+  }
+  return (selected)
+}
+  
+
+function sel(n) {
+  var Component = $(n);
+  if (Component.hasClass("success")) {
+    Component.removeClass("success");
+    Component.addClass("active")
+  } else {
+    Component.removeClass("active");
+    Component.addClass("success")
+  };
+  setSaveButton(false);
+}
+
+function displayAsana() {
+  $("#ename").text(asanas[current].name + " - " + asanas[current].sanskrit);
+  setAttributeButton($("#strength"), asanas[current].strength); 
+  setAttributeButton($("#balance"), asanas[current].balance); 
+  setAttributeButton($("#flexibility"), asanas[current].flexibility)
+  displayVinyasaInfo();
+  $("#pic").attr('src', "/static/stickfigures/" + asanas[current].name.toLowerCase() + ".jpg");
+  getDetails();
+}
+
+function displayVinyasaInfo() {
+  var AnAsana = asanas[current];
+  setAttributeButton($("#is_vinyasa"), AnAsana.is_vinyasa);
+  var control = $("#v_type_em");
+  if (AnAsana.is_vinyasa) { 
+      switch(AnAsana.v_type) { 
+    case "NONE":
+      control.attr('class', "glyphicon glyphicon-certificate");
+      break;
+    case "UP":
+      control.attr('class', "glyphicon glyphicon-arrow-up");
+      break;
+    case "DOWN":
+      control.attr('class', "glyphicon glyphicon-arrow-down");
+      break;
+    case "SIDE":
+      control.attr('class', "glyphicon glyphicon-resize-horizontal");
+      break
+    };
+    $("#v_type").show()
+  } else {
+    control.attr('class', "glyphicon glyphicon-certificate");
+    $("#v_type").hide()
+  }
+};
+
+
+function setAttributeButton(control, value) {
+  if (value) {
+    control.removeClass("glyphicon-remove");
+    control.addClass("glyphicon-ok")
+  } else {
+    control.removeClass("glyphicon-ok");
+    control.addClass("glyphicon-remove")
+  }};
+
+
+function toggleVinyasa() {
+  toggleAttribute('is_vinyasa');
+  if (asanas[current].is_vinyasa) {
+    $("#v_type").show()
+  } else {
+    asanas[current].v_type="NONE";
+    $("#v_type").hide()
+  }
+}
+
+function toggleVType() {
+  var NewType = "";
+  switch(asanas[current].v_type) { 
+  case "NONE":
+    NewType = "UP";
+    break;
+  case "UP":
+    NewType = "DOWN";
+    break;
+  case "DOWN":
+    NewType = "SIDE";
+    break;
+  case "SIDE":
+    NewType = "NONE";
+    break
+  };
+  asanas[current].v_type = NewType;
+  displayVinyasaInfo();
+  setSaveButton(false)
+}
+
+function toggleAttribute(attribute) {
+  //Toggle strength, Balance and Flexibility buttons.
+  asanas[current][attribute] = ! asanas[current][attribute] ;
+  setAttributeButton($("#"+attribute), asanas[current][attribute]); 
+  setSaveButton(false);
+};
+
+function header() {
+  document.getElementById("detailsbutton").setAttribute('onclick','details()');
+  $("#detailsem").removeClass("glyphicon-th-large").addClass("glyphicon-th")
+  $("#main").show();
+  $("#main1").show();
+  $("#main2").show();
+  $("#main3").show();
+  $("#details").hide();
+}
+
+  function details() {
+  document.getElementById("detailsbutton").setAttribute('onclick','header()');
+  $("#detailsem").removeClass("glyphicon-th").addClass("glyphicon-th-large")
+  $("#main").hide();
+  $("#main1").hide();
+  $("#main2").hide();
+  $("#main3").hide();
+  $("#details").show();  
+}
+
+   </script>
+ </body>
+</html>
+
+

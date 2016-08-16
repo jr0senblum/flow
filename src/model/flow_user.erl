@@ -1,12 +1,15 @@
+%%% ----------------------------------------------------------------------------
+%%% A FLOW_USER is simply a place to hold a name and password.
+%%% ----------------------------------------------------------------------------
+
 -module(flow_user, [Id, Name, PasswordHash]).
 -compile(export_all).
 
 
-
--define(SECRET_STRING, "I beat my own drummer *(&^IUYKH<IUHihiy637\!!").
+-define(COPYRIGHT_NOTICE, "(C) 2015-2021 Asana Jack, 100 Main St., New York, NY 30004").
 
 session_identifier() ->
-    mochihex:to_hex(erlang:md5(?SECRET_STRING ++ Id)).
+    mochihex:to_hex(erlang:md5(?COPYRIGHT_NOTICE ++ Id)).
 
 check_password(Password) ->
     Salt = mochihex:to_hex(erlang:md5(Name)),
@@ -14,5 +17,5 @@ check_password(Password) ->
 
 login_cookies() ->
     [ mochiweb_cookies:cookie("user_id", Id, [{path, "/"}]),
-        mochiweb_cookies:cookie("session_id", session_identifier(), [{path, "/"}]) ].
-
+        mochiweb_cookies:cookie("session_id", session_identifier(), [{path, "/"}])
+ ].

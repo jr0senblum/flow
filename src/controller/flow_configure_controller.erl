@@ -5,18 +5,21 @@
 -module(flow_configure_controller, [Req]).
 -compile(export_all).
 
+before_(_) ->
+    user_lib:require_login(Req).
+
 
 % configure/asana GET return nothing to asana.html
-asana('GET', []) ->
+asana('GET', [], _FlowUser) ->
     {ok, []};
 
 %configure/asana/all GET all asanas
-asana('GET', ["all"]) ->
+asana('GET', ["all"], _FlowUser) ->
     Asanas = boss_db:find(asana, [], [{order_by, name}]),
     {json, [{asanas, Asanas}]};
 
 %configure/asana/update POST update the given asana.
-asana('POST', ["update"]) ->
+asana('POST', ["update"], _FlowUser) ->
     UpdatedAsana = update_asana(Req:post_param(<<"new_asana">>)),
 
     update_froms(UpdatedAsana, Req:post_param(<<"from_asanas">>)),
@@ -30,7 +33,7 @@ asana('POST', ["update"]) ->
 % return all of the muscle_grou and range_of_motions. These are not related
 % to the AsanaId, per se, but they might have changed via another screen
 % so it's good to get the latest.
-related('GET', [AsanaId]) ->
+related('GET', [AsanaId], _FlowUser) ->
     Asana = boss_db:find(AsanaId),
     Mg = Asana:muscle_group_objects(),
     Rom = Asana:range_objects(),

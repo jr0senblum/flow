@@ -11,8 +11,8 @@ before_(_) ->
 
 
 % /landing/landing
-landing('GET', [], _FlowUser) ->
-    {ok, []}.
+landing('GET', [], FlowUser) ->
+    {ok, [{user, FlowUser}]}.
 
 % /landing/flow GET JSON to the requester consisting of all flows.
 flows('GET', [], _FlowUser) ->
@@ -20,13 +20,13 @@ flows('GET', [], _FlowUser) ->
     {json, [{flows, Flows}]}.
 
 % /landing/delete POSTING id of flow to delte.
-delete('POST',[]) ->
+delete('POST',[], _FlowUser) ->
     Id = binary_to_list(Req:post_param(<<"id">>)),
     boss_db:delete(Id),
     {205, "reset content", []}.
 
 % /landing/edit POSTING id, name and description to edit/create.
-edit('POST',[]) ->
+edit('POST',[], _FlowUser) ->
     Id = binary_to_list(Req:post_param(<<"id">>)),
     Name = binary_to_list(Req:post_param(<<"name">>)),
     Description = binary_to_list(Req:post_param(<<"description">>)),

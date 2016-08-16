@@ -1,9 +1,14 @@
+%%%-----------------------------------------------------------------------------
+%%% Controller used for logging in/out a user.
+%%%-----------------------------------------------------------------------------
+
 -module(flow_user_controller, [Req]).
 -compile(export_all).
 
 
 login('GET', []) ->
     {ok, [{redirect, Req:header(referer)}]};
+
 login('POST', []) ->
     Name = Req:post_param("name"),
     case boss_db:find(flow_user, [{name, Name}], [{limit,1}]) of

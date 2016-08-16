@@ -5,15 +5,17 @@
 -module(flow_print_controller, [Req]).
 -compile(export_all).
 
+before_(_) ->
+    user_lib:require_login(Req).
 
 % /print/print/flow-id GETs flow-id and flow-name for the print.html
-print('GET', [FlowId]) ->
+print('GET', [FlowId], _FlowUser) ->
     Flow = boss_db:find(FlowId),
     {ok, [{flow_id, FlowId},
           {flow_name, Flow:name()}]}.
 
 % /print/details/flow-id GETS the asana names and image names for the print.html
-details('GET', [FlowId]) -> 
+details('GET', [FlowId], _FlowUser) ->
     Flow        = boss_db:find(FlowId),
     AsanaIds    = get_ids_from_flow(Flow),
     AsanaNames  = get_names_from_ids(AsanaIds),

@@ -211,7 +211,6 @@ function load_flow_asanas(FlowAsanaIds) {
   getRelatedAsana();
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
-  setButtonDisabled($('#printbutton'), false);
   scrollToEnd();
 }
 
@@ -306,7 +305,6 @@ function use() {
 
 
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#printbutton'), true);
   setButtonDisabled($('#undobutton'), flow.length < 2);
   scrollToEnd();
 }
@@ -339,7 +337,6 @@ function restore() {
 
   // no swap, yes use, undo if we have a flow
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#printbutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
 
   scrollToEnd();
@@ -366,7 +363,6 @@ function undo() {
   
   $("#flowthusfar ul li:last").remove();
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#printbutton'), false);
   setButtonDisabled($('#undobutton'), flow.length < 2);
   displayAsanaName();
   getRelatedAsana();
@@ -388,7 +384,6 @@ function backUp(PosId) {
 
   // only the sawp buttonis allowed
   setButtonDisabled($('#usebutton'), false);
-  setButtonDisabled($('#printbutton'), false);
   setButtonDisabled($('#undobutton'), true);
 
   // Flow member to the left, to the right and the one being targeted (middle).

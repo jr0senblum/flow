@@ -109,17 +109,21 @@ load_asana() ->
     {ok, Terms} = file:consult("priv/asanas"),
     [process(X) || X <- lists:sort(Terms)].
 
+% {Name, Sanskrit, IsVinyasa, IsBal, IsFlex, IsStr, VType, IsBlank}
 process({Name, Sanskrit}) ->
-    insert({Name, Sanskrit, false, false, false, false, "none"});
+    insert({Name, Sanskrit, false, false, false, false, "none", false});
+
+process({Name, Sanskrit, blank}) ->
+    insert({Name, Sanskrit, false, false, false, false, "none", true});
 
 process({Name, Sanskrit, VinyasaType}) ->
-    insert({Name, Sanskrit, true, false, false, false, VinyasaType});
+    insert({Name, Sanskrit, true, false, false, false, VinyasaType, false});
 
 process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
-    insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none"}).
+    insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none", false}).
 
 
-insert({Name, Sanskrit, IsV, B, F, S,VType}) ->
+insert({Name, Sanskrit, IsV, B, F, S,VType, IsBlank}) ->
     Name2 = string:strip(Name),
     Sanskrit2 = string:strip(Sanskrit),
     VinyasaType = string:strip(string:to_upper(VType)),
@@ -128,7 +132,8 @@ insert({Name, Sanskrit, IsV, B, F, S,VType}) ->
                 {flexibility, F}, 
                 {balance, B},
                 {is_vinyasa, IsV},
-                {v_type, VinyasaType}],
+                {v_type, VinyasaType},
+                {is_blank, IsBlank}],
 
     case boss_db:find_first(asana,[{name, equals, Name2}]) of
         undefined ->

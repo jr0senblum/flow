@@ -11,7 +11,8 @@
                 Balance::boolean(),
                 Flexibility::boolean(),
                 Strength::boolean(),
-                VType::string()
+                VType::string(),
+                IsBlank::boolean()
                ]).
 
 -compile(export_all).
@@ -32,15 +33,9 @@ validation_tests()->
     ].
 
 
-% If Vinyasa, to_upper the vinyasa type; otherwise set it to "NONE".
-before_create() when IsVinyasa == true ->
-    Modified = set([{balance, false},
-                    {flexibility, false},
-                    {strength, false},
-                    {v_type, string:to_upper(VType)}]),
-    {ok, Modified};
+% Vinyasa type should always be to_upper.
 before_create() ->
-    Modified = set([{v_type, "NONE"}]),
+    Modified = set([{v_type, string:to_upper(VType)}]),
     {ok, Modified}.
 
 
@@ -152,6 +147,4 @@ delete_exits_to(AnExitTo) ->
         [EnterFrom] ->
             boss_db:delete(EnterFrom:id())
     end.
-    
-    
     

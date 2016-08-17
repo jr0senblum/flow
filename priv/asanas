@@ -7,6 +7,8 @@
 %       {Name, Sanskrit, VinyasaType} where VinyasaType is one of
 %                                     "up", "down", "side", "none"; or
 %
+%       BLANKS
+%       {Name, Sanskrit, blank}
 % NOTICE: Name and Sanskrit, and VinyasaType are ALWAYS IN QUOTES, 
 % IsBalance, IsFlexibility, and IsStrength are always either true or false
 
@@ -18,7 +20,8 @@
 {"Standing Side Bend", ""}.
 {"Standing Back Bend", ""}.
 {"Side Down", "", "down"}.
-{"Vinyasa x", "", "none"}.
+{"Vinyasa x", "", blank}.
+{"Asana x", "", blank}.
 
 
 

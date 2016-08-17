@@ -6,6 +6,7 @@
 %       VINYASAS
 %       {Name, Sanskrit, VinyasaType} where VinyasaType is one of
 %                                     "up", "down", "side", "none"; or
+%       {Name, Sanskrit, "none", blank} 
 %
 %       BLANKS
 %       {Name, Sanskrit, blank}
@@ -20,7 +21,7 @@
 {"Standing Side Bend", ""}.
 {"Standing Back Bend", ""}.
 {"Side Down", "", "down"}.
-{"Vinyasa x", "", blank}.
+{"Vinyasa x", "", "none", blank}.
 {"Asana x", "", blank}.
 
 

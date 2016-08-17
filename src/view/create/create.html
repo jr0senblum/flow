@@ -8,13 +8,13 @@
     <meta name="description" content="Source code generated using layoutit.com">
     <meta name="author" content="LayoutIt!">
 
-<link rel="apple-touch-icon-precomposed" sizes="152x152" href="/apple-touch-icon-152x152-precomposed.png">
-<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144x144-precomposed.png">
-<link rel="apple-touch-icon-precomposed" sizes="120x120" href="/apple-touch-icon-120x120-precomposed.png">
-<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/apple-touch-icon-114x114-precomposed.png">
-<link rel="apple-touch-icon-precomposed" sizes="76x76" href="/apple-touch-icon-76x76-precomposed.png">
-<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/apple-touch-icon-72x72-precomposed.png">
-<link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="152x152" href="/static/apple-touch-icon-152x152-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/static/apple-touch-icon-144x144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="120x120" href="/static/apple-touch-icon-120x120-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/apple-touch-icon-114x114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="76x76" href="/static/apple-touch-icon-76x76-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/apple-touch-icon-72x72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="/static/apple-touch-icon-precomposed.png">
 
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
@@ -140,6 +140,7 @@ var altOrigPos;
 var nS = 0;
 var nB = 0;
 var nF = 0;
+var nV = 0;
 var nDown = 0;
 var nUp = 0;
 var nSide = 0;
@@ -483,8 +484,8 @@ function updateAttCount(Asana, bAdd) {
   if (Asana.flexibility && !Asana.is_vinyasa) {
     nF = nF + offset
   };
-  if (Asana.flexibility && !Asana.is_vinyasa) {
-    nF = nF + offset
+  if (Asana.is_vinyasa) {
+    nV = nV + offset
   };
 
 
@@ -511,6 +512,7 @@ function setAtt() {
   $("#attS").text(nS);
   $("#attB").text(nB);
   $("#attF").text(nF);
+  $("#attV").text(nV);
   $("#attC").text(flow.length)
 }
 

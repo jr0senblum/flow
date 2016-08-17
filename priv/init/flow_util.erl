@@ -119,6 +119,10 @@ process({Name, Sanskrit, blank}) ->
 process({Name, Sanskrit, VinyasaType}) ->
     insert({Name, Sanskrit, true, false, false, false, VinyasaType, false});
 
+process({Name, Sanskrit, VinyasaType, blank}) when VinyasaType == "none", VinyasaType == "NONE" ->
+    insert({Name, Sanskrit, true, false, false, false, VinyasaType, true});
+
+
 process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
     insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none", false}).
 

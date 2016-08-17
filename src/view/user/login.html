@@ -1,13 +1,44 @@
-{% if error %}
-<font color="red">{{ error }}</font>
-{% endif %}
-<form method="post">
-Name:<br />
-<input name="name" /><br /><br />
-
-Password:<br />
-<input name="password" type="password" /><br /><br />
-
-<input type="submit" value="Log in" />
-<input type="hidden" name="redirect" value="{{ redirect|default_if_none:"/voter/list" }}" />
-</form>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{flow_name}}</title>
+    <meta name="description" content="Print page for flow application">
+    <meta name="author" content="Jim Rosenblum">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/apple-touch-icon-152x152-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/apple-touch-icon-120x120-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/apple-touch-icon-76x76-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png">
+    <link href="/static/css/print.css" rel="stylesheet">
+  </head>
+  
+  <body>
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/apple-touch-icon-152x152-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/apple-touch-icon-120x120-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/apple-touch-icon-76x76-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png">
+    
+    {% if error %}
+    <font color="red">{{ error }}</font>
+    {% endif %}
+    <form method="post">
+      Name:<br />
+      <input name="name" /><br /><br />
+      
+      Password:<br />
+      <input name="password" type="password" /><br /><br />
+      
+      <input type="submit" value="Log in" />
+      <input type="hidden" name="redirect" value="{{ redirect|default_if_none:"/voter/list" }}" />
+    </form>
+    
+  </body>
+</html>

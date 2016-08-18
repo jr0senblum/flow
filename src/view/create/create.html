@@ -103,6 +103,7 @@ function reset() {
   $("#flowthusfar ul").empty();
   flow=[];
   loadAllAsana(0);
+  resetCounts();
   buttonModeSave(true);
   setButtonDisabled($('#usebutton'), false);
   setButtonDisabled($('#undobutton'), true);
@@ -457,6 +458,7 @@ function resetCounts() {
   nUp=0; 
   nDown=0; 
   nSide=0;
+  setAtt()
 };
 
 function recalcAtt() {

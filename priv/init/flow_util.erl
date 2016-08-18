@@ -111,6 +111,7 @@ load_asana() ->
     process({"Vinyasa X", "", true, false,false,false, "none", true}),
     process({"Asana X", "", false, false, false, false, "none", true}).
 
+
 % {Name, Sanskrit, IsVinyasa, IsBal, IsFlex, IsStr, VType, IsBlank}
 process({Name, Sanskrit}) ->
     insert({Name, Sanskrit, false, false, false, false, "none", false});
@@ -119,7 +120,12 @@ process({Name, Sanskrit, VinyasaType}) ->
     insert({Name, Sanskrit, true, false, false, false, VinyasaType, false});
 
 process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
-    insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none", false}).
+    insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none", false});
+
+process({Name, Sanskrit, IsVin, IsBal, IsFlex, IsStr, VType, IsBlank}) ->
+    insert({Name, Sanskrit, IsVin, IsBal, IsFlex, IsStr, VType, IsBlank}).
+
+
 
 
 insert({Name, Sanskrit, IsV, B, F, S,VType, IsBlank}) ->

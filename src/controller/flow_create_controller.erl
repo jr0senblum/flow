@@ -11,7 +11,7 @@ before_(_) ->
 
 
 create('GET', [FlowId], _FlowUser) ->
-    [VinyasaX] = boss_db:find(asana, [{name, equals, "Vinyasa x"}]),
+    [VinyasaX] = boss_db:find(asana, [{name, equals, "Vinyasa X"}]),
     {ok, [{id, FlowId},
           {vinyasax, VinyasaX:id()}]}.
 

@@ -107,21 +107,16 @@ save_item(Item) ->
 
 load_asana() ->
     {ok, Terms} = file:consult("priv/asanas"),
-    [process(X) || X <- lists:sort(Terms)].
+    [process(X) || X <- lists:sort(Terms)],
+    process({"Vinyasa X", "", true, false,false,false, "none", true}),
+    process({"Asana X", "", false, false, false, false, "none", true}).
 
 % {Name, Sanskrit, IsVinyasa, IsBal, IsFlex, IsStr, VType, IsBlank}
 process({Name, Sanskrit}) ->
     insert({Name, Sanskrit, false, false, false, false, "none", false});
 
-process({Name, Sanskrit, blank}) ->
-    insert({Name, Sanskrit, false, false, false, false, "none", true});
-
 process({Name, Sanskrit, VinyasaType}) ->
     insert({Name, Sanskrit, true, false, false, false, VinyasaType, false});
-
-process({Name, Sanskrit, VinyasaType, blank}) when VinyasaType == "none", VinyasaType == "NONE" ->
-    insert({Name, Sanskrit, true, false, false, false, VinyasaType, true});
-
 
 process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
     insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none", false}).

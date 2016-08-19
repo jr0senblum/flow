@@ -11,7 +11,7 @@
 before_create() ->
     Asana = boss_db:find(AsanaId),
     From =  boss_db:find(FromAsanaId),
-    case (Asana:is_blank() orelse From:is_blank()) of
+    case (Asana:is_special() orelse From:is_special()) of
         true ->
             {error, "Ignoring Blank Asanas"};
         false ->

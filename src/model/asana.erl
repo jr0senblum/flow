@@ -12,7 +12,7 @@
                 Flexibility::boolean(),
                 Strength::boolean(),
                 VType::string(),
-                IsBlank::boolean()
+                IsSpecial::boolean()
                ]).
 
 -compile(export_all).

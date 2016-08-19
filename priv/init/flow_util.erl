@@ -67,6 +67,7 @@ seed() ->
     seed_group(range_of_motion, [J:name() ++ ": " ++ R:name() || 
                                     J <- boss_db:find(joint,[]),
                                     R <- boss_db:find(motion_type,[])]),
+    load_specials(),
     load_asana().
 
 kill_asana() ->
@@ -104,12 +105,15 @@ save_item(Item) ->
                           [Item, Message])
     end.
 
+load_specials() ->
+    process({"Vinyasa X", "", true, false,false,false, "none", true}),
+    process({"Asana X", "", false, false, false, false, "none", true}),
+    process({"Lb", "", false, false,false,false, "none", true}),
+    process({"Rb", "", false, false, false, false, "none", true}).
 
 load_asana() ->
     {ok, Terms} = file:consult("priv/asanas"),
-    [process(X) || X <- lists:sort(Terms)],
-    process({"Vinyasa X", "", true, false,false,false, "none", true}),
-    process({"Asana X", "", false, false, false, false, "none", true}).
+    [process(X) || X <- lists:sort(Terms)].
 
 
 % {Name, Sanskrit, IsVinyasa, IsBal, IsFlex, IsStr, VType, IsBlank}
@@ -122,8 +126,8 @@ process({Name, Sanskrit, VinyasaType}) ->
 process({Name, Sanskrit, Balance, Flexibility, Strength}) ->
     insert({Name, Sanskrit, false, Balance, Flexibility, Strength, "none", false});
 
-process({Name, Sanskrit, IsVin, IsBal, IsFlex, IsStr, VType, IsBlank}) ->
-    insert({Name, Sanskrit, IsVin, IsBal, IsFlex, IsStr, VType, IsBlank}).
+process({Name, Sanskrit, IsVin, IsBal, IsFlex, IsStr, VType, IsSpecial}) ->
+    insert({Name, Sanskrit, IsVin, IsBal, IsFlex, IsStr, VType, IsSpecial}).
 
 
 
@@ -138,7 +142,7 @@ insert({Name, Sanskrit, IsV, B, F, S,VType, IsBlank}) ->
                 {balance, B},
                 {is_vinyasa, IsV},
                 {v_type, VinyasaType},
-                {is_blank, IsBlank}],
+                {is_special, IsBlank}],
 
     case boss_db:find_first(asana,[{name, equals, Name2}]) of
         undefined ->
